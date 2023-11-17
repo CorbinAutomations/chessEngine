@@ -37,24 +37,22 @@ enum Pieces {
 }
 fn general_piece_moves(
     color: String,
-    mut first_index: i8,
-    mut secound_index: i8,
+    first_index: i8,
+    secound_index: i8,
     board: [[i8; 8]; 8],
     legal_moves: &mut Vec<String>,
     terminating: bool,
-    increment_list: Vec<(i8, i8, i8, i8)>,
+    increment_list: Vec<(i8, i8)>,
 ) -> Vec<String> {
     for value in increment_list.iter() {
         let first_index_increment: i8 = value.0;
         let secound_index_increment: i8 = value.1;
-        let first_value_increment = value.2;
-        let secound_value_increment = value.3;
         let mut first_index_clone = first_index.clone();
         let mut secound_index_clone = secound_index.clone();
-        while first_index_clone + first_value_increment < 7
-            && first_index_clone + first_value_increment > 0
-            && secound_index_clone + secound_index_increment < 7
-            && secound_index_clone + secound_value_increment > 0
+        while first_index_clone < 7
+            && first_index_clone > 0
+            && secound_index < 7
+            && secound_index > 0
         {
             first_index_clone += first_index_increment;
             secound_index_clone += secound_index_increment;
@@ -71,7 +69,7 @@ fn general_piece_moves(
             } else {
                 if color == "black" {
                     legal_moves.push(
-                        first_index_clone.to_string() + "," + &secound_index_clone.to_string(),
+                        first_index.to_string() + "," + &secound_index_clone.to_string(),
                     );
                 }
                 break;
@@ -100,7 +98,7 @@ impl Rook {
             board,
             &mut legal_moves,
             false,
-            vec![(1, 0, 0, 0), (-1, 0, 0, 0), (0, 1, 0, 0), (0, -1, 0, 0)],
+            vec![(1, 0), (-1, 0), (0, 1), (0, -1)],
         );
         return legal_moves;
     }
@@ -118,7 +116,7 @@ impl Bishop {
             board,
             &mut legal_moves,
             false,
-            vec![(1, 1, 0, 0), (-1, -1, 0, 0), (1, -1, 0, 0), (-1, 1, 0, 0)],
+            vec![(1, 1), (-1, -1), (1, -1), (-1, 1)],
         );
         return legal_moves;
     }
@@ -128,148 +126,27 @@ impl Knight {
         let first_index = self.position.0;
         let secound_index = self.position.1;
         let mut legal_moves: Vec<String> = vec![];
-        if first_index + 2 < 7 && secound_index - 1 >= 0 {
-            if board[first_index as usize + 2][secound_index as usize - 1] == 0 {
-                legal_moves
-                    .push((first_index + 2).to_string() + "," + &(secound_index - 1).to_string());
-            } else if board[first_index as usize + 2][secound_index as usize - 1] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index + 2).to_string() + "," + &(secound_index - 1).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index + 2).to_string() + "," + &(secound_index - 1).to_string(),
-                    );
-                }
-            }
-        }
-        if first_index + 2 < 7 && secound_index + 1 <= 7 {
-            if board[first_index as usize + 2][secound_index as usize + 1] == 0 {
-                legal_moves
-                    .push((first_index + 2).to_string() + "," + &(secound_index + 1).to_string());
-            } else if board[first_index as usize + 2][secound_index as usize + 1] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index + 2).to_string() + "," + &(secound_index + 1).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index + 2).to_string() + "," + &(secound_index + 1).to_string(),
-                    );
-                }
-            }
-        }
-        if first_index - 2 > 0 && secound_index - 1 >= 0 {
-            if board[first_index as usize - 2][secound_index as usize - 1] == 0 {
-                legal_moves
-                    .push((first_index - 2).to_string() + "," + &(secound_index - 1).to_string());
-            } else if board[first_index as usize - 2][secound_index as usize - 1] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index - 2).to_string() + "," + &(secound_index - 1).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index - 2).to_string() + "," + &(secound_index - 1).to_string(),
-                    );
-                }
-            }
-        }
-        if first_index - 2 > 0 && secound_index + 1 <= 7 {
-            if board[first_index as usize - 2][secound_index as usize + 1] == 0 {
-                legal_moves
-                    .push((first_index - 2).to_string() + "," + &(secound_index + 1).to_string());
-            } else if board[first_index as usize - 2][secound_index as usize + 1] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index - 2).to_string() + "," + &(secound_index + 1).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index - 2).to_string() + "," + &(secound_index + 1).to_string(),
-                    );
-                }
-            }
-        }
-
-        if first_index + 1 < 7 && secound_index - 2 > 0 {
-            if board[first_index as usize + 1][secound_index as usize - 2] == 0 {
-                legal_moves
-                    .push((first_index + 1).to_string() + "," + &(secound_index - 2).to_string());
-            } else if board[first_index as usize + 1][secound_index as usize - 2] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index + 1).to_string() + "," + &(secound_index - 2).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index + 1).to_string() + "," + &(secound_index - 2).to_string(),
-                    );
-                }
-            }
-        }
-        if first_index + 1 < 7 && secound_index + 2 < 8 {
-            if board[first_index as usize + 1][secound_index as usize + 2] == 0 {
-                legal_moves
-                    .push((first_index + 1).to_string() + "," + &(secound_index + 2).to_string());
-            } else if board[first_index as usize + 1][secound_index as usize + 2] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index + 1).to_string() + "," + &(secound_index + 2).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index + 1).to_string() + "," + &(secound_index + 2).to_string(),
-                    );
-                }
-            }
-        }
-        if first_index - 1 > 0 && secound_index - 2 > 0 {
-            if board[first_index as usize - 1][secound_index as usize - 2] == 0 {
-                legal_moves
-                    .push((first_index - 1).to_string() + "," + &(secound_index - 2).to_string());
-            } else if board[first_index as usize - 1][secound_index as usize - 2] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index - 1).to_string() + "," + &(secound_index - 2).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index - 1).to_string() + "," + &(secound_index - 2).to_string(),
-                    );
-                }
-            }
-        }
-        if first_index - 1 > 0 && secound_index + 2 < 8 {
-            if board[first_index as usize - 1][secound_index as usize + 2] == 0 {
-                legal_moves
-                    .push((first_index - 1).to_string() + "," + &(secound_index + 2).to_string());
-            } else if board[first_index as usize - 1][secound_index as usize + 2] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index - 1).to_string() + "," + &(secound_index + 2).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index - 1).to_string() + "," + &(secound_index + 2).to_string(),
-                    );
+        
+        let move_list: Vec<(i8, i8)> = vec![(2, -1), (2, 1), (-2, -1), (-2, 1), (1, -2), (1, 2), (-1, -2), (-1, 2)];
+        for piece_move in move_list{
+            let first_index_increment = piece_move.0;
+            let secound_index_increment = piece_move.1;
+            if first_index + first_index_increment < 7 && first_index + first_index_increment >= 0 && secound_index + secound_index_increment >= 0 && secound_index + secound_index_increment < 7 {
+                if board[(first_index + first_index_increment) as usize ][(secound_index + secound_index_increment) as usize] == 0 {
+                    legal_moves
+                        .push((first_index + first_index_increment).to_string() + "," + &(secound_index + secound_index_increment).to_string());
+                } else if board[(first_index + first_index_increment) as usize][(secound_index + secound_index_increment) as usize] < 0 {
+                    if self.color == "white" {
+                        legal_moves.push(
+                            (first_index + first_index_increment).to_string() + "," + &(secound_index + secound_index_increment).to_string(),
+                        );
+                    }
+                } else {
+                    if self.color == "black" {
+                        legal_moves.push(
+                            (first_index + first_index_increment).to_string() + "," + &(secound_index + secound_index_increment).to_string(),
+                        );
+                    }
                 }
             }
         }
@@ -290,14 +167,14 @@ impl Queen {
             &mut legal_moves,
             false,
             vec![
-                (1, 0, 0, 0),
-                (-1, 0, 0, 0),
-                (0, 1, 0, 0),
-                (0, -1, 0, 0),
-                (1, 1, 0, 0),
-                (-1, -1, 0, 0),
-                (1, -1, 0, 0),
-                (-1, 1, 0, 0),
+                (1, 0),
+                (-1, 0),
+                (0, 1),
+                (0, -1),
+                (1, 1),
+                (-1, -1),
+                (1, -1),
+                (-1, 1),
             ],
         );
         return legal_moves;
@@ -384,14 +261,14 @@ impl King {
             &mut legal_moves,
             true,
             vec![
-                (1, 0, 0, 0),
-                (-1, 0, 0, 0),
-                (0, 1, 0, 0),
-                (0, -1, 0, 0),
-                (1, 1, 0, 0),
-                (-1, -1, 0, 0),
-                (1, -1, 0, 0),
-                (-1, 1, 0, 0),
+                (1, 0),
+                (-1, 0),
+                (0, 1),
+                (0, -1),
+                (1, 1),
+                (-1, -1),
+                (1, -1),
+                (-1, 1),
             ],
         );
         return legal_moves;
