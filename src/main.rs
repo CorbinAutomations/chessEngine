@@ -2,36 +2,30 @@ use std::{collections::HashMap, io::stdin};
 struct Rook {
     position: (i8, i8),
     color: String,
-    is_alive: bool,
 }
 struct Bishop {
     position: (i8, i8),
     color: String,
-    is_alive: bool,
 }
 
 struct Knight {
     position: (i8, i8),
     color: String,
-    is_alive: bool,
 }
 
 struct Queen {
     position: (i8, i8),
     color: String,
-    is_alive: bool,
 }
 
 struct Pawn {
     position: (i8, i8),
     color: String,
-    is_alive: bool,
 }
 
 struct King {
     position: (i8, i8),
     color: String,
-    is_alive: bool,
 }
 enum Pieces {
     Rook(Rook),
@@ -41,190 +35,94 @@ enum Pieces {
     Bishop(Bishop),
     King(King),
 }
-//generate possible moves not accounting for complex rules such as checks or castling/pins
-impl Rook {
-    fn rook_moves(&self, board: [[i8; 8]; 8]) -> Vec<String> {
-        let mut first_index = self.position.0;
-        let secound_index = self.position.1;
-        let mut legal_moves: Vec<String> = vec![];
-
-        while first_index < 7 {
-            first_index += 1;
-            if board[first_index as usize][secound_index as usize] == 0 {
-                legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
-            } else if board[first_index as usize][secound_index as usize] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
+fn general_piece_moves(
+    color: String,
+    mut first_index: i8,
+    mut secound_index: i8,
+    board: [[i8; 8]; 8],
+    legal_moves: &mut Vec<String>,
+    terminating: bool,
+    increment_list: Vec<(i8, i8, i8, i8)>,
+) -> Vec<String> {
+    for value in increment_list.iter() {
+        let first_index_increment: i8 = value.0;
+        let secound_index_increment: i8 = value.1;
+        let first_value_increment = value.2;
+        let secound_value_increment = value.3;
+        let mut first_index_clone = first_index.clone();
+        let mut secound_index_clone = secound_index.clone();
+        while first_index_clone + first_value_increment < 7
+            && first_index_clone + first_value_increment > 0
+            && secound_index_clone + secound_index_increment < 7
+            && secound_index_clone + secound_value_increment > 0
+        {
+            first_index_clone += first_index_increment;
+            secound_index_clone += secound_index_increment;
+            if board[first_index_clone as usize][secound_index_clone as usize] == 0 {
+                legal_moves
+                    .push(first_index_clone.to_string() + "," + &secound_index_clone.to_string());
+            } else if board[first_index_clone as usize][secound_index_clone as usize] < 0 {
+                if color == "white" {
+                    legal_moves.push(
+                        first_index_clone.to_string() + "," + &secound_index_clone.to_string(),
+                    );
                 }
                 break;
             } else {
-                if self.color == "black" {
-                    legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
+                if color == "black" {
+                    legal_moves.push(
+                        first_index_clone.to_string() + "," + &secound_index_clone.to_string(),
+                    );
                 }
                 break;
             }
-
-            let mut first_index = self.position.0;
-            while first_index > 0 {
-                first_index -= 1;
-                if board[first_index as usize][secound_index as usize] == 0 {
-                    legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
-                } else if board[first_index as usize][secound_index as usize] < 0 {
-                    if self.color == "white" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                } else {
-                    if self.color == "black" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                }
-            }
-            let first_index = self.position.0;
-            let mut secound_index = self.position.1;
-            while secound_index < 7 {
-                secound_index += 1;
-                if board[first_index as usize][secound_index as usize] == 0 {
-                    legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
-                } else if board[first_index as usize][secound_index as usize] < 0 {
-                    if self.color == "white" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                } else {
-                    if self.color == "black" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                }
-            }
-
-            let mut secound_index = self.position.1;
-            while secound_index > 0 {
-                secound_index -= 1;
-                if board[first_index as usize][secound_index as usize] == 0 {
-                    legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
-                } else if board[first_index as usize][secound_index as usize] < 0 {
-                    if self.color == "white" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                } else {
-                    if self.color == "black" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                }
+            if terminating {
+                break;
             }
         }
+    }
+    for value in legal_moves.iter() {
+        println!("value is {}", value)
+    }
+    return legal_moves.to_vec();
+}
+//generate possible moves not accounting for complex rules such as checks or castling/pins
+impl Rook {
+    fn rook_moves(&self, board: [[i8; 8]; 8]) -> Vec<String> {
+        let first_index = self.position.0;
+        let secound_index = self.position.1;
+        let mut legal_moves: Vec<String> = vec![];
+
+        general_piece_moves(
+            self.color.clone(),
+            first_index,
+            secound_index,
+            board,
+            &mut legal_moves,
+            false,
+            vec![(1, 0, 0, 0), (-1, 0, 0, 0), (0, 1, 0, 0), (0, -1, 0, 0)],
+        );
         return legal_moves;
     }
 }
 
 impl Bishop {
     fn bishop_moves(&self, board: [[i8; 8]; 8]) -> Vec<String> {
-        let mut first_index = self.position.0;
-        let mut secound_index = self.position.1;
+        let first_index = self.position.0;
+        let secound_index = self.position.1;
         let mut legal_moves: Vec<String> = vec![];
-        loop {
-            while first_index < 7 && secound_index < 7 {
-                first_index += 1;
-                secound_index += 1;
-                if board[first_index as usize][secound_index as usize] == 0 {
-                    legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
-                } else if board[first_index as usize][secound_index as usize] < 0 {
-                    if self.color == "white" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                } else {
-                    if self.color == "black" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                }
-
-                let mut first_index = self.position.0;
-                let mut secound_index = self.position.1;
-                while first_index > 0 && secound_index > 0 {
-                    first_index -= 1;
-                    secound_index -= 1;
-                    if board[first_index as usize][secound_index as usize] == 0 {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    } else if board[first_index as usize][secound_index as usize] < 0 {
-                        if self.color == "white" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    } else {
-                        if self.color == "black" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    }
-                }
-                let mut first_index = self.position.0;
-                let mut secound_index = self.position.1;
-                while first_index < 7 && secound_index > 0 {
-                    first_index += 1;
-                    secound_index -= 1;
-                    if board[first_index as usize][secound_index as usize] == 0 {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    } else if board[first_index as usize][secound_index as usize] < 0 {
-                        if self.color == "white" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    } else {
-                        if self.color == "black" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    }
-                }
-            }
-
-            let mut first_index = self.position.0;
-            let mut secound_index = self.position.1;
-            while first_index > 0 && secound_index < 7 {
-                first_index -= 1;
-                secound_index += 1;
-                if board[first_index as usize][secound_index as usize] == 0 {
-                    legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
-                } else if board[first_index as usize][secound_index as usize] < 0 {
-                    if self.color == "white" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                } else {
-                    if self.color == "black" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                }
-            }
-            break legal_moves;
-        }
+        general_piece_moves(
+            self.color.clone(),
+            first_index,
+            secound_index,
+            board,
+            &mut legal_moves,
+            false,
+            vec![(1, 1, 0, 0), (-1, -1, 0, 0), (1, -1, 0, 0), (-1, 1, 0, 0)],
+        );
+        return legal_moves;
     }
 }
-
 impl Knight {
     fn knight_moves(&self, board: [[i8; 8]; 8]) -> Vec<String> {
         let first_index = self.position.0;
@@ -381,184 +279,31 @@ impl Knight {
 
 impl Queen {
     fn queen_moves(&self, board: [[i8; 8]; 8]) -> Vec<String> {
-        let mut first_index = self.position.0;
+        let first_index = self.position.0;
         let secound_index = self.position.1;
         let mut legal_moves: Vec<String> = vec![];
-        loop {
-            while first_index < 7 {
-                first_index += 1;
-                if board[first_index as usize][secound_index as usize] == 0 {
-                    legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
-                } else if board[first_index as usize][secound_index as usize] < 0 {
-                    if self.color == "white" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                } else {
-                    if self.color == "black" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                }
-
-                let mut first_index = self.position.0;
-                while first_index > 0 {
-                    first_index -= 1;
-                    if board[first_index as usize][secound_index as usize] == 0 {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    } else if board[first_index as usize][secound_index as usize] < 0 {
-                        if self.color == "white" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    } else {
-                        if self.color == "black" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    }
-                }
-                let first_index = self.position.0;
-                let mut secound_index = self.position.1;
-                while secound_index < 7 {
-                    secound_index += 1;
-                    if board[first_index as usize][secound_index as usize] == 0 {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    } else if board[first_index as usize][secound_index as usize] < 0 {
-                        if self.color == "white" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    } else {
-                        if self.color == "black" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    }
-                }
-
-                let mut secound_index = self.position.1;
-                while secound_index > 0 {
-                    secound_index -= 1;
-                    if board[first_index as usize][secound_index as usize] == 0 {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    } else if board[first_index as usize][secound_index as usize] < 0 {
-                        if self.color == "white" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    } else {
-                        if self.color == "black" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    }
-                }
-            }
-            let mut first_index = self.position.0;
-            let mut secound_index = self.position.1;
-            while first_index < 7 && secound_index < 7 {
-                first_index += 1;
-                secound_index += 1;
-                if board[first_index as usize][secound_index as usize] == 0 {
-                    legal_moves.push(first_index.to_string() + "," + &secound_index.to_string());
-                } else if board[first_index as usize][secound_index as usize] < 0 {
-                    if self.color == "white" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                } else {
-                    if self.color == "black" {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    }
-                    break;
-                }
-
-                let mut first_index = self.position.0;
-                let mut secound_index = self.position.1;
-                while first_index > 0 && secound_index > 0 {
-                    first_index -= 1;
-                    secound_index -= 1;
-                    if board[first_index as usize][secound_index as usize] == 0 {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    } else if board[first_index as usize][secound_index as usize] < 0 {
-                        if self.color == "white" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    } else {
-                        if self.color == "black" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    }
-                }
-                let mut first_index = self.position.0;
-                let mut secound_index = self.position.1;
-                while first_index < 7 && secound_index > 0 {
-                    first_index += 1;
-                    secound_index -= 1;
-                    if board[first_index as usize][secound_index as usize] == 0 {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    } else if board[first_index as usize][secound_index as usize] < 0 {
-                        if self.color == "white" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    } else {
-                        if self.color == "black" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    }
-                }
-
-                let mut first_index = self.position.0;
-                let mut secound_index = self.position.1;
-                while first_index > 0 && secound_index < 7 {
-                    first_index -= 1;
-                    secound_index += 1;
-                    if board[first_index as usize][secound_index as usize] == 0 {
-                        legal_moves
-                            .push(first_index.to_string() + "," + &secound_index.to_string());
-                    } else if board[first_index as usize][secound_index as usize] < 0 {
-                        if self.color == "white" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    } else {
-                        if self.color == "black" {
-                            legal_moves
-                                .push(first_index.to_string() + "," + &secound_index.to_string());
-                        }
-                        break;
-                    }
-                }
-            }
-            break legal_moves;
-        }
+        general_piece_moves(
+            self.color.clone(),
+            first_index,
+            secound_index,
+            board,
+            &mut legal_moves,
+            false,
+            vec![
+                (1, 0, 0, 0),
+                (-1, 0, 0, 0),
+                (0, 1, 0, 0),
+                (0, -1, 0, 0),
+                (1, 1, 0, 0),
+                (-1, -1, 0, 0),
+                (1, -1, 0, 0),
+                (-1, 1, 0, 0),
+            ],
+        );
+        return legal_moves;
     }
 }
+
 impl Pawn {
     fn pawn_moves(&self, board: [[i8; 8]; 8]) -> Vec<String> {
         let first_index = self.position.0;
@@ -631,153 +376,24 @@ impl King {
         let secound_index = self.position.1;
         let mut legal_moves: Vec<String> = vec![];
 
-        if first_index + 1 < 7 && secound_index + 1 <= 7 {
-            println!(
-                "{}",
-                board[first_index as usize + 1][secound_index as usize + 1]
-            );
-            if board[first_index as usize + 1][secound_index as usize + 1] == 0 {
-                legal_moves
-                    .push((first_index + 1).to_string() + "," + &(secound_index + 1).to_string());
-            } else if board[first_index as usize + 1][secound_index as usize + 1] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index + 1).to_string() + "," + &(secound_index + 1).to_string(),
-                    );
-                }
-            } else if board[first_index as usize + 1][secound_index as usize + 1] > 0 {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index + 1).to_string() + "," + &(secound_index + 1).to_string(),
-                    );
-                    println!(
-                        "{}",
-                        board[first_index as usize + 1][secound_index as usize + 1]
-                    )
-                }
-            }
-        }
-
-        if first_index + 1 < 7 && secound_index - 1 >= 0 {
-            if board[first_index as usize + 1][secound_index as usize - 1] == 0 {
-                legal_moves
-                    .push((first_index + 1).to_string() + "," + &(secound_index - 1).to_string());
-            } else if board[first_index as usize + 1][secound_index as usize - 1] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index + 1).to_string() + "," + &(secound_index - 1).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index + 1).to_string() + "," + &(secound_index - 1).to_string(),
-                    );
-                }
-            }
-        }
-
-        if first_index - 1 > 0 && secound_index - 1 >= 0 {
-            if board[first_index as usize - 1][secound_index as usize - 1] == 0 {
-                legal_moves
-                    .push((first_index - 1).to_string() + "," + &(secound_index - 1).to_string());
-            } else if board[first_index as usize - 1][secound_index as usize - 1] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index - 1).to_string() + "," + &(secound_index - 1).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index - 1).to_string() + "," + &(secound_index - 1).to_string(),
-                    );
-                }
-            }
-        }
-
-        if first_index - 1 > 0 && secound_index + 1 <= 7 {
-            if board[first_index as usize - 1][secound_index as usize + 1] == 0 {
-                legal_moves
-                    .push((first_index - 1).to_string() + "," + &(secound_index + 1).to_string());
-            } else if board[first_index as usize - 1][secound_index as usize + 1] < 0 {
-                if self.color == "white" {
-                    legal_moves.push(
-                        (first_index - 1).to_string() + "," + &(secound_index + 1).to_string(),
-                    );
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves.push(
-                        (first_index - 1).to_string() + "," + &(secound_index + 1).to_string(),
-                    );
-                }
-            }
-        }
-
-        if first_index - 1 > 0 {
-            if board[first_index as usize - 1][secound_index as usize] == 0 {
-                legal_moves.push((first_index - 1).to_string() + "," + &secound_index.to_string());
-            } else if board[first_index as usize - 1][secound_index as usize] < 0 {
-                if self.color == "white" {
-                    legal_moves
-                        .push((first_index - 1).to_string() + "," + &secound_index.to_string());
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves
-                        .push((first_index - 1).to_string() + "," + &secound_index.to_string());
-                }
-            }
-        }
-
-        if first_index + 1 < 7 {
-            if board[first_index as usize + 1][secound_index as usize] == 0 {
-                legal_moves.push((first_index + 1).to_string() + "," + &secound_index.to_string());
-            } else if board[first_index as usize + 1][secound_index as usize] < 0 {
-                if self.color == "white" {
-                    legal_moves
-                        .push((first_index + 1).to_string() + "," + &secound_index.to_string());
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves
-                        .push((first_index + 1).to_string() + "," + &secound_index.to_string());
-                }
-            }
-        }
-
-        if secound_index - 1 >= 0 {
-            if board[first_index as usize][secound_index as usize - 1] == 0 {
-                legal_moves.push(first_index.to_string() + "," + &(secound_index - 1).to_string());
-            } else if board[first_index as usize][secound_index as usize - 1] < 0 {
-                if self.color == "white" {
-                    legal_moves
-                        .push((first_index).to_string() + "," + &(secound_index - 1).to_string());
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves
-                        .push((first_index).to_string() + "," + &(secound_index - 1).to_string());
-                }
-            }
-        }
-
-        if secound_index + 1 <= 7 {
-            if board[first_index as usize][secound_index as usize + 1] == 0 {
-                legal_moves.push(first_index.to_string() + "," + &(secound_index + 1).to_string());
-            } else if board[first_index as usize][secound_index as usize + 1] < 0 {
-                if self.color == "white" {
-                    legal_moves
-                        .push((first_index).to_string() + "," + &(secound_index + 1).to_string());
-                }
-            } else {
-                if self.color == "black" {
-                    legal_moves
-                        .push((first_index).to_string() + "," + &(secound_index + 1).to_string());
-                }
-            }
-        }
+        general_piece_moves(
+            self.color.clone(),
+            first_index,
+            secound_index,
+            board,
+            &mut legal_moves,
+            true,
+            vec![
+                (1, 0, 0, 0),
+                (-1, 0, 0, 0),
+                (0, 1, 0, 0),
+                (0, -1, 0, 0),
+                (1, 1, 0, 0),
+                (-1, -1, 0, 0),
+                (1, -1, 0, 0),
+                (-1, 1, 0, 0),
+            ],
+        );
         return legal_moves;
     }
 }
@@ -838,7 +454,7 @@ fn main() {
     let rank_two: [i8; 8] = [1, 1, 1, 1, 1, 1, 1, 1];
     let rank_three: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_four: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_five: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    let rank_five: [i8; 8] = [0, 0, 2, 0, 0, 0, 0, 0];
     let rank_six: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_seven: [i8; 8] = [-1, -1, -1, -1, -1, -1, -1, -1];
     let rank_eight: [i8; 8] = [-4, -2, -3, -6, -5, -3, -2, -4];
@@ -871,42 +487,36 @@ fn main() {
                     board_state_vector.push(Pieces::Pawn(Pawn {
                         position: (first_index_counter, secound_index_counter),
                         color: String::from(struct_color),
-                        is_alive: true,
                     }));
                 }
                 if *value == 2 || *value == -2 {
                     board_state_vector.push(Pieces::Knight(Knight {
                         position: (first_index_counter, secound_index_counter),
                         color: String::from(struct_color),
-                        is_alive: true,
                     }));
                 }
                 if *value == 3 || *value == -3 {
                     board_state_vector.push(Pieces::Bishop(Bishop {
                         position: (first_index_counter, secound_index_counter),
                         color: String::from(struct_color),
-                        is_alive: true,
                     }));
                 }
                 if *value == 4 || *value == -4 {
                     board_state_vector.push(Pieces::Rook(Rook {
                         position: (first_index_counter, secound_index_counter),
                         color: String::from(struct_color),
-                        is_alive: true,
                     }));
                 }
                 if *value == 5 || *value == -5 {
                     board_state_vector.push(Pieces::Queen(Queen {
                         position: (first_index_counter, secound_index_counter),
                         color: String::from(struct_color),
-                        is_alive: true,
                     }));
                 }
                 if *value == 6 || *value == -6 {
                     board_state_vector.push(Pieces::King(King {
                         position: (first_index_counter, secound_index_counter),
                         color: String::from(struct_color),
-                        is_alive: true,
                     }));
                 }
                 secound_index_counter += 1;
@@ -918,64 +528,55 @@ fn main() {
         let mut black_piece_moves: Vec<String> = vec![];
         for value in board_state_vector.iter() {
             let mut piece_color = "";
-            let mut piece_is_alive = false;
             let mut piece_moves = vec![];
             let mut piece_position: (i8, i8) = (10, 10);
             match value {
                 Pieces::Rook(rook) => {
                     piece_color = &rook.color;
-                    piece_is_alive = rook.is_alive;
                     piece_position = rook.position;
                     piece_moves = rook.rook_moves(board_state)
                 }
                 Pieces::Knight(knight) => {
                     piece_color = &knight.color;
-                    piece_is_alive = knight.is_alive;
                     piece_position = knight.position;
                     piece_moves = knight.knight_moves(board_state)
                 }
                 Pieces::Pawn(pawn) => {
                     piece_color = &pawn.color;
-                    piece_is_alive = pawn.is_alive;
                     piece_position = pawn.position;
                     piece_moves = pawn.pawn_moves(board_state)
                 }
                 Pieces::Queen(queen) => {
                     piece_color = &queen.color;
-                    piece_is_alive = queen.is_alive;
                     piece_position = queen.position;
                     piece_moves = queen.queen_moves(board_state)
                 }
                 Pieces::Bishop(bishop) => {
                     piece_color = &bishop.color;
-                    piece_is_alive = bishop.is_alive;
                     piece_position = bishop.position;
                     piece_moves = bishop.bishop_moves(board_state)
                 }
                 Pieces::King(king) => {
                     piece_color = &king.color;
-                    piece_is_alive = king.is_alive;
                     piece_position = king.position;
                     piece_moves = king.king_moves(board_state)
                 }
             }
-            if piece_is_alive == true {
-                for value in piece_moves.iter() {
-                    let parsed_move = index_to_move(
-                        String::from(index_to_position(
-                            &(piece_position.0 as u32),
-                            &(piece_position.1 as u32),
-                        )) + (":")
-                            + value,
-                        &int_to_alphabet,
-                    );
-                    let parsed_move_clone = parsed_move.clone();
-                    total_moves.push(parsed_move);
-                    if piece_color == "white" {
-                        white_piece_moves.push(parsed_move_clone);
-                    } else {
-                        black_piece_moves.push(parsed_move_clone);
-                    }
+            for value in piece_moves.iter() {
+                let parsed_move = index_to_move(
+                    String::from(index_to_position(
+                        &(piece_position.0 as u32),
+                        &(piece_position.1 as u32),
+                    )) + (":")
+                        + value,
+                    &int_to_alphabet,
+                );
+                let parsed_move_clone = parsed_move.clone();
+                total_moves.push(parsed_move);
+                if piece_color == "white" {
+                    white_piece_moves.push(parsed_move_clone);
+                } else {
+                    black_piece_moves.push(parsed_move_clone);
                 }
             }
         }
@@ -1002,7 +603,7 @@ fn main() {
                     //println!("black move value is {}", value)
                 }
             }
-            if is_white_to_move == true {
+            if is_white_to_move {
                 if white_piece_moves.contains(&custom_move) {
                     let first_value = custom_move.chars().nth(0).unwrap().to_string();
                     let first_value = alphabet_hash.get(&first_value).unwrap();
