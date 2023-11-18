@@ -87,9 +87,6 @@ fn general_piece_moves(
             }
         }
     }
-    for value in legal_moves.iter() {
-        println!("value is {}", value)
-    }
     return legal_moves.to_vec();
 }
 //generate possible moves not accounting for complex rules such as checks or castling/pins
@@ -341,6 +338,72 @@ impl King {
     }
 }
 
+fn prune_ilegal_moves(
+    legal_moves: &mut Vec<String>,
+    board: [[i8; 8]; 8],
+    int_to_alphabet: &HashMap<String, String>,
+    alphabet_hash: &HashMap<String, i32>,
+    is_white: bool,
+    white_moves: &mut Vec<String>,
+    black_moves: &mut Vec<String>
+)->(Vec<String>, Vec<String>) {
+    let  mut legal_move_counter = 0;
+    let mut color = "";
+    if is_white{
+        color = "white";
+    }
+    else {
+        color = "black";
+    }
+    for Move in legal_moves.iter() {
+        let mut board_state = board.clone();
+        let first_value = Move.chars().nth(0).unwrap().to_string();
+        let first_value = alphabet_hash.get(&first_value).unwrap();
+        let secound_value = Move.chars().nth(1).unwrap().to_string();
+        let mut secound_value: i32 = secound_value.parse().unwrap();
+        secound_value -= 1;
+        let third_value = Move.chars().nth(3).unwrap().to_string();
+        let third_value = alphabet_hash.get(&third_value).unwrap();
+        let fourth_value = Move.chars().nth(4).unwrap().to_string();
+        let mut fourth_value: i32 = fourth_value.parse().unwrap();
+        fourth_value -= 1;
+        let starting_position =
+            board_state[secound_value as usize][*first_value as usize];
+        board_state[fourth_value as usize][*third_value as usize] = starting_position;
+        board_state[secound_value as usize][*first_value as usize] = 0;
+
+
+        let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
+        let white_squares_attacked = moves_and_attacks.2;
+        let black_squares_attacked = moves_and_attacks.4;
+        let white_king_position = moves_and_attacks.5;
+        let black_king_position = moves_and_attacks.6;
+        if color == "white"{
+            if black_squares_attacked.contains(&white_king_position){
+                let move_to_remove = legal_moves.get(legal_move_counter).unwrap();
+                let index = white_moves.iter().position(|x| *x == *move_to_remove);
+                println!("your white king is on {}", white_king_position);
+                if index.is_some(){
+                    white_moves.remove(index.unwrap());
+                    println!("we just removed something")
+                }
+            }
+        }
+        else{
+            if white_squares_attacked.contains(&black_king_position){
+                let move_to_remove = legal_moves.get(legal_move_counter).unwrap();
+                let index = black_moves.iter().position(|x| *x == *move_to_remove);
+                if index.is_some(){
+                    black_moves.remove(index.unwrap());
+                    println!("we just removed something")
+                }
+            }
+        }
+        legal_move_counter += 1;
+        }
+        return (white_moves.to_vec(), black_moves.to_vec());
+}
+
 fn index_to_move(value: String, int_to_alphabet_hash: &HashMap<String, String>) -> String {
     let first_value = value.chars().nth(0).unwrap().to_string();
     let secound_value = value.chars().nth(1).unwrap().to_string();
@@ -364,6 +427,8 @@ fn moves_and_attacks_from_board_state(
     Vec<String>,
     Vec<String>,
     Vec<String>,
+    String,
+    String,
 ) {
     let mut board_state_vector: Vec<Pieces> = vec![];
     let mut first_index_counter: i8 = 0;
@@ -421,6 +486,8 @@ fn moves_and_attacks_from_board_state(
     let mut black_piece_moves: Vec<String> = vec![];
     let mut black_squares_attacked: Vec<String> = vec![];
     let mut white_squares_attacked: Vec<String> = vec![];
+    let mut white_king_position:String = "".to_string();
+    let mut black_king_position:String = "".to_string();
     for value in board_state_vector.iter() {
         let mut piece_color = "";
         let mut piece_moves = vec![];
@@ -462,11 +529,13 @@ fn moves_and_attacks_from_board_state(
                 piece_position = king.position;
                 piece_moves = king.king_moves(board_state);
                 piece_attacks = king.king_moves(board_state);
-                println!(
-                    "{} king is at {}",
-                    piece_color,
-                    index_to_position(&(piece_position.0 as u32), &(piece_position.1 as u32))
-                );
+                if piece_color == "white" {
+                     white_king_position =
+                        index_to_position(&(piece_position.0 as u32), &(piece_position.1 as u32));
+                } else {
+                     black_king_position =
+                        index_to_position(&(piece_position.0 as u32), &(piece_position.1 as u32));
+                }
             }
         }
         for value in piece_moves.iter() {
@@ -514,6 +583,8 @@ fn moves_and_attacks_from_board_state(
         white_squares_attacked,
         black_piece_moves,
         black_squares_attacked,
+        white_king_position.to_string(),
+        black_king_position.to_string(),
     );
 }
 fn index_to_position(first_index: &u32, secound_index: &u32) -> String {
@@ -554,12 +625,12 @@ fn main() {
     int_to_alphabet.insert("6".to_string(), "b".to_string());
     int_to_alphabet.insert("7".to_string(), "a".to_string());
 
-    let rank_one: [i8; 8] = [4, 2, 3, 6, 5, 3, 2, 4];
+    let rank_one: [i8; 8] = [4, 2, 3, 0, 5, 3, 2, 4];
     let rank_two: [i8; 8] = [1, 1, 1, 1, 1, 1, 1, 1];
     let rank_three: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_four: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_five: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_six: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    let rank_four: [i8; 8] = [0, 0, 2, 0, 0, 0, 0, 0];
+    let rank_five: [i8; 8] = [0, 0, 0, 6, 0, 0, 0, 0];
+    let rank_six: [i8; 8] = [0, 0, 0, 0, 4, 0, 0, 0];
     let rank_seven: [i8; 8] = [-1, -1, -1, -1, -1, -1, -1, -1];
     let rank_eight: [i8; 8] = [-4, -2, -3, -6, -5, -3, -2, -4];
     let mut board_state: [[i8; 8]; 8] = [
@@ -579,16 +650,21 @@ fn main() {
     let mut result = "";
     while game_has_ended == false {
         let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
-        let total_moves = moves_and_attacks.0;
-        let white_piece_moves = moves_and_attacks.1;
-        let white_squares_attacked = moves_and_attacks.2;
-        let black_piece_moves = moves_and_attacks.3;
+        let mut total_moves = moves_and_attacks.0;
+        let mut white_piece_moves = moves_and_attacks.1;
+        let mut white_squares_attacked = moves_and_attacks.2;
+        let mut black_piece_moves = moves_and_attacks.3;
         let black_squares_attacked = moves_and_attacks.4;
+        let white_king_position = moves_and_attacks.5;
+        let black_king_position = moves_and_attacks.6;
         println!("there are {} total moves", (total_moves.iter().len()));
+        let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
+        let white_piece_moves = parsed_piece_moves.0;
+        let black_piece_moves = parsed_piece_moves.1; 
         loop {
             let mut custom_move = String::new();
             stdin().read_line(&mut custom_move).unwrap();
-            let custom_move = custom_move.trim().to_string();
+            let custom_move = custom_move.trim().to_string();      
             if is_white_to_move {
                 if white_piece_moves.contains(&custom_move) {
                     let first_value = custom_move.chars().nth(0).unwrap().to_string();
@@ -604,7 +680,6 @@ fn main() {
                     let starting_position =
                         board_state[secound_value as usize][*first_value as usize];
                     board_state[fourth_value as usize][*third_value as usize] = starting_position;
-                    println!("starting position is {}", starting_position);
                     board_state[secound_value as usize][*first_value as usize] = 0;
                     if is_white_to_move == true {
                         is_white_to_move = false;
@@ -618,9 +693,15 @@ fn main() {
                         }
                         println!()
                     }
-                    let number_of_repetitions = list_of_position.iter().filter(|&n| *n == board_state).count();
-                    println!("there have been {} repetitions of this position", number_of_repetitions);
-                    if number_of_repetitions == 3{
+                    let number_of_repetitions = list_of_position
+                        .iter()
+                        .filter(|&n| *n == board_state)
+                        .count();
+                    println!(
+                        "there have been {} repetitions of this position",
+                        number_of_repetitions
+                    );
+                    if number_of_repetitions == 3 {
                         game_has_ended = true;
                         result = "draw by repetition"
                     }
@@ -643,7 +724,6 @@ fn main() {
                     let starting_position =
                         board_state[secound_value as usize][*first_value as usize];
                     board_state[fourth_value as usize][*third_value as usize] = starting_position;
-                    println!("starting position is {}", starting_position);
                     board_state[secound_value as usize][*first_value as usize] = 0;
                     if is_white_to_move == true {
                         is_white_to_move = false;
@@ -658,9 +738,15 @@ fn main() {
                         println!()
                     }
                     list_of_position.push(board_state);
-                    let number_of_repetitions = list_of_position.iter().filter(|&n| *n == board_state).count();
-                    println!("there have been {} repetitions of this position", number_of_repetitions);
-                    if number_of_repetitions == 3{
+                    let number_of_repetitions = list_of_position
+                        .iter()
+                        .filter(|&n| *n == board_state)
+                        .count();
+                    println!(
+                        "there have been {} repetitions of this position",
+                        number_of_repetitions
+                    );
+                    if number_of_repetitions == 3 {
                         game_has_ended = true;
                         result = "draw by repetition"
                     }
