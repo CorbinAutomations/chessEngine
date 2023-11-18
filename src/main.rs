@@ -565,6 +565,7 @@ fn main() {
     let mut board_state: [[i8; 8]; 8] = [
         rank_one, rank_two, rank_three, rank_four, rank_five, rank_six, rank_seven, rank_eight,
     ];
+    let mut list_of_position: Vec<[[i8; 8]; 8]> = vec![];
     for value in board_state.iter() {
         let array_iterator = value.iter();
         for value in array_iterator {
@@ -575,6 +576,7 @@ fn main() {
 
     let mut game_has_ended = false;
     let mut is_white_to_move = true;
+    let mut result = "";
     while game_has_ended == false {
         let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
         let total_moves = moves_and_attacks.0;
@@ -616,6 +618,12 @@ fn main() {
                         }
                         println!()
                     }
+                    let number_of_repetitions = list_of_position.iter().filter(|&n| *n == board_state).count();
+                    println!("there have been {} repetitions of this position", number_of_repetitions);
+                    if number_of_repetitions == 3{
+                        game_has_ended = true;
+                        result = "draw by repetition"
+                    }
                     break;
                 } else {
                     println!("invalid move please try again");
@@ -649,11 +657,19 @@ fn main() {
                         }
                         println!()
                     }
+                    list_of_position.push(board_state);
+                    let number_of_repetitions = list_of_position.iter().filter(|&n| *n == board_state).count();
+                    println!("there have been {} repetitions of this position", number_of_repetitions);
+                    if number_of_repetitions == 3{
+                        game_has_ended = true;
+                        result = "draw by repetition"
+                    }
                     break;
                 } else {
                     println!("invalid move please try again")
                 }
             }
         }
+        println!("{}", result);
     }
 }
