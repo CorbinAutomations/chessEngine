@@ -687,7 +687,7 @@ fn main() {
                         else {
                             fifty_move_counter += 0.5;
                         }
-                        if fifty_move_counter == 3.0 {
+                        if fifty_move_counter == 50.0 {
                             result = "draw by fifty move rule";
                             game_has_ended = true
                         }
@@ -761,7 +761,7 @@ fn main() {
                         else {
                             fifty_move_counter += 0.5;
                         }
-                        if fifty_move_counter == 3.0 {
+                        if fifty_move_counter == 50.0 {
                             result = "draw by fifty move rule";
                             game_has_ended = true
                         }
