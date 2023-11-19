@@ -219,13 +219,13 @@ impl Pawn {
         let secound_index = self.position.1;
         let mut legal_moves: Vec<String> = vec![];
         if self.color == "white" {
-            if first_index + 1 < 7 {
+            if first_index + 1 <= 7 {
                 if board[first_index as usize + 1][secound_index as usize] == 0 {
                     legal_moves
                         .push((first_index + 1).to_string() + "," + &secound_index.to_string());
                 }
             }
-            if first_index + 2 < 7 && first_index == 1 {
+            if first_index + 2 <= 7 && first_index == 1 {
                 if board[first_index as usize + 2][secound_index as usize] == 0
                     && board[first_index as usize + 1][secound_index as usize] == 0
                 {
@@ -233,7 +233,7 @@ impl Pawn {
                         .push((first_index + 2).to_string() + "," + &secound_index.to_string());
                 }
             }
-            if first_index + 1 < 7 && secound_index - 1 >= 0 {
+            if first_index + 1 <= 7 && secound_index - 1 >= 0 {
                 if board[first_index as usize + 1][secound_index as usize - 1] < 0 {
                     legal_moves.push(
                         (first_index + 1).to_string() + "," + &(secound_index - 1).to_string(),
@@ -241,7 +241,7 @@ impl Pawn {
                 }
             }
 
-            if first_index + 1 < 7 && secound_index + 1 <= 7 {
+            if first_index + 1 <= 7 && secound_index + 1 <= 7 {
                 if board[first_index as usize + 1][secound_index as usize + 1] < 0 {
                     legal_moves.push(
                         (first_index + 1).to_string() + "," + &(secound_index + 1).to_string(),
@@ -251,13 +251,13 @@ impl Pawn {
         }
 
         if self.color == "black" {
-            if first_index - 1 > 0 {
+            if first_index - 1 >= 0 {
                 if board[first_index as usize - 1][secound_index as usize] == 0 {
                     legal_moves
                         .push((first_index - 1).to_string() + "," + &secound_index.to_string());
                 }
             }
-            if first_index - 2 > 0 && first_index == 6 {
+            if first_index - 2 >= 0 && first_index == 6 {
                 if board[first_index as usize - 2][secound_index as usize] == 0
                     && board[first_index as usize - 1][secound_index as usize] == 0
                 {
@@ -265,14 +265,14 @@ impl Pawn {
                         .push((first_index - 2).to_string() + "," + &secound_index.to_string());
                 }
             }
-            if first_index - 1 > 0 && secound_index - 1 >= 0 {
+            if first_index - 1 >= 0 && secound_index - 1 >= 0 {
                 if board[first_index as usize - 1][secound_index as usize - 1] > 0 {
                     legal_moves.push(
                         (first_index + 1).to_string() + "," + &(secound_index - 1).to_string(),
                     );
                 }
             }
-            if first_index - 1 > 0 && secound_index + 1 <= 7 {
+            if first_index - 1 >= 0 && secound_index + 1 <= 7 {
                 if board[first_index as usize - 1][secound_index as usize + 1] < 0 {
                     legal_moves.push(
                         (first_index - 1).to_string() + "," + &(secound_index + 1).to_string(),
@@ -640,13 +640,13 @@ fn main() {
     int_to_alphabet.insert("6".to_string(), "b".to_string());
     int_to_alphabet.insert("7".to_string(), "a".to_string());
 
-    let rank_one: [i8; 8] = [0, 0, 0, 0, 6, 0, 3, -6];
-    let rank_two: [i8; 8] = [0, 0, 0, 0, -3, 0, 0, 0];
+    let rank_one: [i8; 8] = [0, 0, 0, 0, 6, 0, 0, -6];
+    let rank_two: [i8; 8] = [-1, 0, 0, 0, 0, 0, 0, 0];
     let rank_three: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_four: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_five: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_six: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_seven: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    let rank_seven: [i8; 8] = [1, 0, 0, 0, 0, 0, 0, 0];
     let rank_eight: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let mut board_state: [[i8; 8]; 8] = [
         rank_one, rank_two, rank_three, rank_four, rank_five, rank_six, rank_seven, rank_eight,
@@ -704,6 +704,31 @@ fn main() {
                         }
                     board_state[fourth_value as usize][*third_value as usize] = starting_position;
                     board_state[secound_value as usize][*first_value as usize] = 0;
+                    if fourth_value == 7{
+                        if board_state[fourth_value as usize][*third_value as usize] == 1{
+                            loop {
+                                let mut promotion_piece = String::new();
+                                stdin().read_line(&mut promotion_piece).unwrap();
+                                promotion_piece = promotion_piece.trim().to_string();
+                                if promotion_piece == "rook"{
+                                    board_state[fourth_value as usize][*third_value as usize] = 4;
+                                    break
+                                }
+                                else if promotion_piece == "bishop"{
+                                    board_state[fourth_value as usize][*third_value as usize] = 3;
+                                    break
+                                }
+                                else if promotion_piece == "knight"{
+                                    board_state[fourth_value as usize][*third_value as usize] = 2;
+                                    break
+                                }
+                                else if promotion_piece == "queen"{
+                                    board_state[fourth_value as usize][*third_value as usize] = 5;
+                                    break
+                                }
+                            }
+                        }
+                    }
                     if is_white_to_move == true {
                         is_white_to_move = false;
                     } else {
@@ -824,6 +849,33 @@ fn main() {
                         }
                     board_state[fourth_value as usize][*third_value as usize] = starting_position;
                     board_state[secound_value as usize][*first_value as usize] = 0;
+                    
+                    if fourth_value == 0{
+                        if board_state[fourth_value as usize][*third_value as usize] == -1{
+                            loop {
+                                let mut promotion_piece = String::new();
+                                stdin().read_line(&mut promotion_piece).unwrap();
+                                promotion_piece = promotion_piece.trim().to_string();
+                                if promotion_piece == "rook"{
+                                    board_state[fourth_value as usize][*third_value as usize] = -4;
+                                    break
+                                }
+                                else if promotion_piece == "bishop"{
+                                    board_state[fourth_value as usize][*third_value as usize] = -3;
+                                    break
+                                }
+                                else if promotion_piece == "knight"{
+                                    board_state[fourth_value as usize][*third_value as usize] = -2;
+                                    break
+                                }
+                                else if promotion_piece == "queen"{
+                                    board_state[fourth_value as usize][*third_value as usize] = -5;
+                                    break
+                                }
+                            }
+                        }
+                    }
+                    
                     if is_white_to_move == true {
                         is_white_to_move = false;
                     } else {
