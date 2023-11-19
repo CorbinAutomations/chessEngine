@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::stdin};
+use std::{collections::HashMap, io::stdin, any::type_name};
 struct Rook {
     position: (i8, i8),
     color: String,
@@ -6,6 +6,7 @@ struct Rook {
 struct Bishop {
     position: (i8, i8),
     color: String,
+    square_color: String
 }
 
 struct Knight {
@@ -429,7 +430,8 @@ fn moves_and_attacks_from_board_state(
     Vec<String>,
     String,
     String,
-    Vec<String>
+    Vec<String>,
+    Vec<Pieces>
 ) {
     let mut board_state_vector: Vec<Pieces> = vec![];
     let mut first_index_counter: i8 = 0;
@@ -456,9 +458,17 @@ fn moves_and_attacks_from_board_state(
                 }));
             }
             if *value == 3 || *value == -3 {
+                let mut square_color = "";
+                if (first_index_counter + 1 * secound_index_counter + 1) % 2 == 1{
+                    square_color = "black";
+                }
+                else{
+                    square_color = "white"
+                }
                 board_state_vector.push(Pieces::Bishop(Bishop {
                     position: (first_index_counter, secound_index_counter),
                     color: String::from(struct_color),
+                    square_color: String::from(square_color)
                 }));
             }
             if *value == 4 || *value == -4 {
@@ -588,7 +598,8 @@ fn moves_and_attacks_from_board_state(
         black_squares_attacked,
         white_king_position.to_string(),
         black_king_position.to_string(),
-        pawn_positions
+        pawn_positions,
+        board_state_vector,
     );
 }
 fn index_to_position(first_index: &u32, secound_index: &u32) -> String {
@@ -629,14 +640,14 @@ fn main() {
     int_to_alphabet.insert("6".to_string(), "b".to_string());
     int_to_alphabet.insert("7".to_string(), "a".to_string());
 
-    let rank_one: [i8; 8] = [4, 2, 3, 6, 5, 3, 2, 4];
-    let rank_two: [i8; 8] = [1, 1, 1, 1, 1, 1, 1, 1];
+    let rank_one: [i8; 8] = [0, 0, 0, 0, 6, 0, 3, -6];
+    let rank_two: [i8; 8] = [0, 0, 0, 0, -3, 0, 0, 0];
     let rank_three: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_four: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_five: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_six: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_seven: [i8; 8] = [-1, -1, -1, -1, -1, -1, -1, -1];
-    let rank_eight: [i8; 8] = [-4, -2, -3, -6, -5, -3, -2, -4];
+    let rank_seven: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    let rank_eight: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let mut board_state: [[i8; 8]; 8] = [
         rank_one, rank_two, rank_three, rank_four, rank_five, rank_six, rank_seven, rank_eight,
     ];
@@ -723,8 +734,54 @@ fn main() {
         let mut black_piece_moves = moves_and_attacks.3;
         let black_king_position = moves_and_attacks.6;
         let mut total_moves = moves_and_attacks.0;
+        let list_of_pieces = moves_and_attacks.8;
         let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
         let black_piece_moves = parsed_piece_moves.1; 
+        let mut number_of_knights = 0;
+        let mut number_of_black_bishops = 0;
+        let mut number_of_white_bishops = 0;
+        let mut number_of_bishops = 0;
+        if list_of_pieces.len() <= 4{
+            let mut bishop_color = "";
+            for value in list_of_pieces.iter(){
+                match value {
+                    Pieces::Knight(knight) => number_of_knights += 1,
+                    Pieces::Bishop(bishop) => {number_of_bishops += 1;
+                    if bishop.square_color == "white"{
+                        number_of_white_bishops += 1
+                    }
+                    else{
+                        number_of_black_bishops += 1    
+                    }
+                }
+                _ => println!(),
+                }
+            }
+            if number_of_bishops + number_of_knights + 2 == list_of_pieces.len(){
+                if number_of_bishops + number_of_knights <= 2{
+                    if number_of_bishops == 1 && number_of_knights == 0{
+                        result = "draw by insufficent material";
+                        game_has_ended = true;
+                    }
+                    else if number_of_knights == 1 && number_of_bishops == 0{
+                        result = "draw by insuffience material";
+                        game_has_ended = true;
+                    }
+                    else if number_of_bishops + number_of_knights == 0{
+                        result = "draw by insufficent material";
+                        game_has_ended = true;
+                    }
+                    else if number_of_white_bishops == 2{
+                        result = "draw by insufficent material";
+                        game_has_ended = true
+                    }
+                    else if number_of_black_bishops == 2{
+                        result = "draw by insufficent material";
+                        game_has_ended = true;
+                    }
+                }
+            }
+        }
                     if black_piece_moves.len() == 0{
                         if white_squares_attacked.contains(&black_king_position){
                             result = "white wins by checkmate";
@@ -800,6 +857,52 @@ fn main() {
         let mut total_moves = moves_and_attacks.0;
         let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
         let white_piece_moves = parsed_piece_moves.0;
+        let list_of_pieces = moves_and_attacks.8;
+        let mut number_of_knights = 0;
+        let mut number_of_black_bishops = 0;
+        let mut number_of_white_bishops = 0;
+        let mut number_of_bishops = 0;
+        if list_of_pieces.len() <= 4{
+            for value in list_of_pieces.iter(){
+                match value {
+                    Pieces::Knight(Knight) => number_of_knights += 1,
+                    Pieces::Bishop(bishop) => {number_of_bishops += 1;
+                    if bishop.square_color == "white"{
+                        number_of_white_bishops += 1
+                    }
+                    else{
+                        number_of_black_bishops += 1    
+                    }
+                }
+                _ => println!(),
+                }
+            }
+            if number_of_bishops + number_of_knights + 2 == list_of_pieces.len(){
+                if number_of_bishops + number_of_knights <= 2{
+                    if number_of_bishops == 1 && number_of_knights == 0{
+                        result = "draw by insufficent material";
+                        game_has_ended = true;
+                    }
+                    else if number_of_knights == 1 && number_of_bishops == 0{
+                        result = "draw by insuffience material";
+                        game_has_ended = true;
+                    }
+                    else if number_of_bishops + number_of_knights == 0{
+                        result = "draw by insufficent material";
+                        game_has_ended = true;
+                    }
+                    else if number_of_white_bishops == 2{
+                        result = "draw by insufficent material";
+                        game_has_ended = true
+                    }
+                    else if number_of_black_bishops == 2{
+                        result = "draw by insufficent material";
+                        game_has_ended = true;
+                    }
+                }
+            }
+            
+        }
                     if white_piece_moves.len() == 0{
                         if black_squares_attacked.contains(&white_king_position){
                             result = "black wins by checkmate";
