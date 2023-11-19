@@ -625,14 +625,14 @@ fn main() {
     int_to_alphabet.insert("6".to_string(), "b".to_string());
     int_to_alphabet.insert("7".to_string(), "a".to_string());
 
-    let rank_one: [i8; 8] = [4, 2, 3, 0, 5, 3, 2, 4];
-    let rank_two: [i8; 8] = [1, 1, 1, 1, 1, 1, 1, 1];
+    let rank_one: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    let rank_two: [i8; 8] = [0, 0, 0, 6, 0, 0, 0, 0];
     let rank_three: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_four: [i8; 8] = [0, 0, 2, 0, 0, 0, 0, 0];
-    let rank_five: [i8; 8] = [0, 0, 0, 6, 0, 0, 0, 0];
-    let rank_six: [i8; 8] = [0, 0, 0, 0, 4, 0, 0, 0];
-    let rank_seven: [i8; 8] = [-1, -1, -1, -1, -1, -1, -1, -1];
-    let rank_eight: [i8; 8] = [-4, -2, -3, -6, -5, -3, -2, -4];
+    let rank_four: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    let rank_five: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    let rank_six: [i8; 8] = [0, 0, 5, 0, 0, 0, 0, 0];
+    let rank_seven: [i8; 8] = [0, 0, 0, 0, 0, 4, 0, 0];
+    let rank_eight: [i8; 8] = [-6, 0, 0, 0, 0, 0, 0, 0];
     let mut board_state: [[i8; 8]; 8] = [
         rank_one, rank_two, rank_three, rank_four, rank_five, rank_six, rank_seven, rank_eight,
     ];
@@ -705,6 +705,27 @@ fn main() {
                         game_has_ended = true;
                         result = "draw by repetition"
                     }
+                    let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
+        let mut white_piece_moves = moves_and_attacks.1;
+        let mut white_squares_attacked = moves_and_attacks.2;
+        let mut black_piece_moves = moves_and_attacks.3;
+        let black_squares_attacked = moves_and_attacks.4;
+        let white_king_position = moves_and_attacks.5;
+        let black_king_position = moves_and_attacks.6;
+        println!("there are {} total moves", (total_moves.iter().len()));
+        let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
+        let white_piece_moves = parsed_piece_moves.0;
+        let black_piece_moves = parsed_piece_moves.1; 
+                    if black_piece_moves.len() == 0{
+                        if white_squares_attacked.contains(&black_king_position){
+                            result = "white wins by checkmate";
+                            game_has_ended = true;
+                        }
+                        else{
+                            result = "draw by stalemate";
+                            game_has_ended = true;
+                        }
+                    }
                     break;
                 } else {
                     println!("invalid move please try again");
@@ -749,6 +770,27 @@ fn main() {
                     if number_of_repetitions == 3 {
                         game_has_ended = true;
                         result = "draw by repetition"
+                    }
+                    let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
+        let mut white_piece_moves = moves_and_attacks.1;
+        let mut white_squares_attacked = moves_and_attacks.2;
+        let mut black_piece_moves = moves_and_attacks.3;
+        let black_squares_attacked = moves_and_attacks.4;
+        let white_king_position = moves_and_attacks.5;
+        let black_king_position = moves_and_attacks.6;
+        println!("there are {} total moves", (total_moves.iter().len()));
+        let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
+        let white_piece_moves = parsed_piece_moves.0;
+        let black_piece_moves = parsed_piece_moves.1; 
+                    if white_piece_moves.len() == 0{
+                        if black_squares_attacked.contains(&white_king_position){
+                            result = "white wins by checkmate";
+                            game_has_ended = true
+                        }
+                        else{
+                            result = "draw by stalemate";
+                            game_has_ended = true
+                        }
                     }
                     break;
                 } else {
