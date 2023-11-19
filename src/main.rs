@@ -281,7 +281,7 @@ impl Pawn {
         }
         return legal_moves;
     }
-    fn pawn_attacks(&self, board: [[i8; 8]; 8]) -> Vec<String> {
+    fn pawn_attacks(&self) -> Vec<String> {
         let first_index = self.position.0;
         let secound_index = self.position.1;
         let mut attack_moves: Vec<String> = vec![];
@@ -429,9 +429,11 @@ fn moves_and_attacks_from_board_state(
     Vec<String>,
     String,
     String,
+    Vec<String>
 ) {
     let mut board_state_vector: Vec<Pieces> = vec![];
     let mut first_index_counter: i8 = 0;
+    let mut pawn_positions: Vec<String> = vec![];
     for value in board_state.iter() {
         let mut secound_index_counter: i8 = 0;
         let mut struct_color = "";
@@ -510,7 +512,8 @@ fn moves_and_attacks_from_board_state(
                 piece_color = &pawn.color;
                 piece_position = pawn.position;
                 piece_moves = pawn.pawn_moves(board_state);
-                piece_attacks = pawn.pawn_attacks(board_state)
+                piece_attacks = pawn.pawn_attacks();
+                pawn_positions.push(index_to_position(&(piece_position.0 as u32), &(piece_position.1 as u32)))
             }
             Pieces::Queen(queen) => {
                 piece_color = &queen.color;
@@ -585,6 +588,7 @@ fn moves_and_attacks_from_board_state(
         black_squares_attacked,
         white_king_position.to_string(),
         black_king_position.to_string(),
+        pawn_positions
     );
 }
 fn index_to_position(first_index: &u32, secound_index: &u32) -> String {
@@ -625,14 +629,14 @@ fn main() {
     int_to_alphabet.insert("6".to_string(), "b".to_string());
     int_to_alphabet.insert("7".to_string(), "a".to_string());
 
-    let rank_one: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_two: [i8; 8] = [0, 0, 0, 6, 0, 0, 0, 0];
+    let rank_one: [i8; 8] = [4, 2, 3, 6, 5, 3, 2, 4];
+    let rank_two: [i8; 8] = [1, 1, 1, 1, 1, 1, 1, 1];
     let rank_three: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_four: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let rank_five: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_six: [i8; 8] = [0, 0, 5, 0, 0, 0, 0, 0];
-    let rank_seven: [i8; 8] = [0, 0, 0, 0, 0, 4, 0, 0];
-    let rank_eight: [i8; 8] = [-6, 0, 0, 0, 0, 0, 0, 0];
+    let rank_six: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    let rank_seven: [i8; 8] = [-1, -1, -1, -1, -1, -1, -1, -1];
+    let rank_eight: [i8; 8] = [-4, -2, -3, -6, -5, -3, -2, -4];
     let mut board_state: [[i8; 8]; 8] = [
         rank_one, rank_two, rank_three, rank_four, rank_five, rank_six, rank_seven, rank_eight,
     ];
@@ -648,23 +652,20 @@ fn main() {
     let mut game_has_ended = false;
     let mut is_white_to_move = true;
     let mut result = "";
+    let mut fifty_move_counter: f32 = 0.0;
     while game_has_ended == false {
         let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
         let mut total_moves = moves_and_attacks.0;
         let mut white_piece_moves = moves_and_attacks.1;
-        let mut white_squares_attacked = moves_and_attacks.2;
         let mut black_piece_moves = moves_and_attacks.3;
-        let black_squares_attacked = moves_and_attacks.4;
-        let white_king_position = moves_and_attacks.5;
-        let black_king_position = moves_and_attacks.6;
         println!("there are {} total moves", (total_moves.iter().len()));
         let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
         let white_piece_moves = parsed_piece_moves.0;
-        let black_piece_moves = parsed_piece_moves.1; 
+        let black_piece_moves = parsed_piece_moves.1;    
         loop {
             let mut custom_move = String::new();
             stdin().read_line(&mut custom_move).unwrap();
-            let custom_move = custom_move.trim().to_string();      
+            let custom_move = custom_move.trim().to_string();   
             if is_white_to_move {
                 if white_piece_moves.contains(&custom_move) {
                     let first_value = custom_move.chars().nth(0).unwrap().to_string();
@@ -679,6 +680,17 @@ fn main() {
                     fourth_value -= 1;
                     let starting_position =
                         board_state[secound_value as usize][*first_value as usize];
+                        let pawn_positions = moves_and_attacks.7;
+                        if board_state[fourth_value as usize][*third_value as usize] < 0 || pawn_positions.contains(&custom_move[0..2].to_string()){
+                            fifty_move_counter = 0.0
+                        }
+                        else {
+                            fifty_move_counter += 0.5;
+                        }
+                        if fifty_move_counter == 3.0 {
+                            result = "draw by fifty move rule";
+                            game_has_ended = true
+                        }
                     board_state[fourth_value as usize][*third_value as usize] = starting_position;
                     board_state[secound_value as usize][*first_value as usize] = 0;
                     if is_white_to_move == true {
@@ -707,14 +719,11 @@ fn main() {
                     }
                     let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
         let mut white_piece_moves = moves_and_attacks.1;
-        let mut white_squares_attacked = moves_and_attacks.2;
+        let white_squares_attacked = moves_and_attacks.2;
         let mut black_piece_moves = moves_and_attacks.3;
-        let black_squares_attacked = moves_and_attacks.4;
-        let white_king_position = moves_and_attacks.5;
         let black_king_position = moves_and_attacks.6;
-        println!("there are {} total moves", (total_moves.iter().len()));
+        let mut total_moves = moves_and_attacks.0;
         let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
-        let white_piece_moves = parsed_piece_moves.0;
         let black_piece_moves = parsed_piece_moves.1; 
                     if black_piece_moves.len() == 0{
                         if white_squares_attacked.contains(&black_king_position){
@@ -726,6 +735,7 @@ fn main() {
                             game_has_ended = true;
                         }
                     }
+                    println!("fifty move counter is at {}", fifty_move_counter);
                     break;
                 } else {
                     println!("invalid move please try again");
@@ -744,6 +754,17 @@ fn main() {
                     fourth_value -= 1;
                     let starting_position =
                         board_state[secound_value as usize][*first_value as usize];
+                        let pawn_positions = moves_and_attacks.7;
+                        if board_state[fourth_value as usize][*third_value as usize] > 0 || pawn_positions.contains(&custom_move[0..2].to_string()){
+                            fifty_move_counter = 0.0
+                        }
+                        else {
+                            fifty_move_counter += 0.5;
+                        }
+                        if fifty_move_counter == 3.0 {
+                            result = "draw by fifty move rule";
+                            game_has_ended = true
+                        }
                     board_state[fourth_value as usize][*third_value as usize] = starting_position;
                     board_state[secound_value as usize][*first_value as usize] = 0;
                     if is_white_to_move == true {
@@ -773,25 +794,23 @@ fn main() {
                     }
                     let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
         let mut white_piece_moves = moves_and_attacks.1;
-        let mut white_squares_attacked = moves_and_attacks.2;
         let mut black_piece_moves = moves_and_attacks.3;
         let black_squares_attacked = moves_and_attacks.4;
         let white_king_position = moves_and_attacks.5;
-        let black_king_position = moves_and_attacks.6;
-        println!("there are {} total moves", (total_moves.iter().len()));
+        let mut total_moves = moves_and_attacks.0;
         let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
         let white_piece_moves = parsed_piece_moves.0;
-        let black_piece_moves = parsed_piece_moves.1; 
                     if white_piece_moves.len() == 0{
                         if black_squares_attacked.contains(&white_king_position){
-                            result = "white wins by checkmate";
-                            game_has_ended = true
+                            result = "black wins by checkmate";
+                            game_has_ended = true;
                         }
                         else{
                             result = "draw by stalemate";
-                            game_has_ended = true
+                            game_has_ended = true;
                         }
                     }
+                    println!("fifty move counter is at {}", fifty_move_counter);
                     break;
                 } else {
                     println!("invalid move please try again")
