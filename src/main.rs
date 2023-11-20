@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::stdin, any::type_name};
+use std::{any::type_name, collections::HashMap, io::stdin};
 struct Rook {
     position: (i8, i8),
     color: String,
@@ -6,7 +6,7 @@ struct Rook {
 struct Bishop {
     position: (i8, i8),
     color: String,
-    square_color: String
+    square_color: String,
 }
 
 struct Knight {
@@ -346,14 +346,13 @@ fn prune_ilegal_moves(
     alphabet_hash: &HashMap<String, i32>,
     is_white: bool,
     white_moves: &mut Vec<String>,
-    black_moves: &mut Vec<String>
-)->(Vec<String>, Vec<String>) {
-    let  mut legal_move_counter = 0;
+    black_moves: &mut Vec<String>,
+) -> (Vec<String>, Vec<String>) {
+    let mut legal_move_counter = 0;
     let mut color = "";
-    if is_white{
+    if is_white {
         color = "white";
-    }
-    else {
+    } else {
         color = "black";
     }
     for Move in legal_moves.iter() {
@@ -368,41 +367,38 @@ fn prune_ilegal_moves(
         let fourth_value = Move.chars().nth(4).unwrap().to_string();
         let mut fourth_value: i32 = fourth_value.parse().unwrap();
         fourth_value -= 1;
-        let starting_position =
-            board_state[secound_value as usize][*first_value as usize];
+        let starting_position = board_state[secound_value as usize][*first_value as usize];
         board_state[fourth_value as usize][*third_value as usize] = starting_position;
         board_state[secound_value as usize][*first_value as usize] = 0;
-
 
         let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
         let white_squares_attacked = moves_and_attacks.2;
         let black_squares_attacked = moves_and_attacks.4;
         let white_king_position = moves_and_attacks.5;
         let black_king_position = moves_and_attacks.6;
-        if color == "white"{
-            if black_squares_attacked.contains(&white_king_position){
+        if color == "white" {
+            if black_squares_attacked.contains(&white_king_position) {
                 let move_to_remove = legal_moves.get(legal_move_counter).unwrap();
                 let index = white_moves.iter().position(|x| *x == *move_to_remove);
                 println!("your white king is on {}", white_king_position);
-                if index.is_some(){
+                if index.is_some() {
                     white_moves.remove(index.unwrap());
                     println!("we just removed something")
                 }
             }
-        }
-        else{
-            if white_squares_attacked.contains(&black_king_position){
+        } else {
+            if white_squares_attacked.contains(&black_king_position) {
                 let move_to_remove = legal_moves.get(legal_move_counter).unwrap();
                 let index = black_moves.iter().position(|x| *x == *move_to_remove);
-                if index.is_some(){
+                if index.is_some() {
                     black_moves.remove(index.unwrap());
                     println!("we just removed something")
                 }
             }
         }
         legal_move_counter += 1;
-        }
-        return (white_moves.to_vec(), black_moves.to_vec());
+    }
+    return (white_moves.to_vec(), black_moves.to_vec());
 }
 
 fn index_to_move(value: String, int_to_alphabet_hash: &HashMap<String, String>) -> String {
@@ -419,6 +415,93 @@ fn index_to_move(value: String, int_to_alphabet_hash: &HashMap<String, String>) 
         + alphabet_value.unwrap()
         + &six_value.to_string();
 }
+fn un_passant(
+    board: [[i8; 8]; 8],
+    last_move: String,
+    alphabet_hash: &HashMap<String, i32>,
+    black_moves: &mut Vec<String>,
+    white_moves: &mut Vec<String>,
+)-> (Vec<String>, Vec<String>, String){
+    let mut unpassant_move = "".to_string();
+
+    if last_move != ""{
+        println!("your last move was {}", last_move);
+        let first_value = last_move.chars().nth(0).unwrap().to_string();
+    let first_value = alphabet_hash.get(&first_value).unwrap();
+    let secound_value = last_move.chars().nth(1).unwrap().to_string();
+    let mut secound_value: i32 = secound_value.parse().unwrap();
+    secound_value -= 1;
+    let third_value = last_move.chars().nth(3).unwrap().to_string();
+    let third_value = alphabet_hash.get(&third_value).unwrap();
+    let fourth_value = last_move.chars().nth(4).unwrap().to_string();
+    let mut fourth_value: i32 = fourth_value.parse().unwrap();
+    fourth_value -= 1;
+    if board[fourth_value as usize][*third_value as usize] == 1 {
+        if fourth_value - secound_value == 2 {
+            println!("your just moved up two squares");
+            if board[fourth_value as usize][(*third_value - 1) as usize] == -1 {
+                println!("detected it was a white pawn");
+                if board[(fourth_value - 1) as usize][*third_value as usize] == 0 {
+                    unpassant_move = index_to_position(&(fourth_value as u32), &((third_value - 1) as u32))
+                    + ":" + &index_to_position(
+                        &((fourth_value - 1) as u32),
+                        &(*third_value as u32),
+                    );
+                    black_moves.push(
+                       unpassant_move.clone() 
+                    )
+                }
+            }
+            else if board[fourth_value as usize][(*third_value + 1) as usize] == -1 {
+                println!("detected it was a white pawn");
+                if board[(fourth_value - 1) as usize][*third_value as usize] == 0 {
+                    let unpassant_move = index_to_position(&(fourth_value as u32), &((third_value + 1) as u32))
+                            + ":" + &index_to_position(
+                                &((fourth_value - 1) as u32),
+                                &(*third_value as u32),
+                                
+                            );
+                    black_moves.push(
+                        unpassant_move.clone()
+                    )
+                }
+            }
+        }
+    }
+    if board[fourth_value as usize][*third_value as usize] == -1 {
+        if fourth_value - secound_value == -2 {
+            println!("your just moved up two squares");
+            if board[fourth_value as usize][(*third_value - 1) as usize] == 1 {
+                println!("detected it was a white pawn");
+                if board[(fourth_value + 1) as usize][*third_value as usize] == 0 {
+                    unpassant_move = index_to_position(&(fourth_value as u32), &((third_value - 1) as u32))
+                    + ":" + &index_to_position(
+                        &((fourth_value + 1) as u32),
+                        &(*third_value as u32),
+                    );
+                    white_moves.push(
+                        unpassant_move.clone()
+                    )
+                }
+            }
+            else if board[fourth_value as usize][(*third_value + 1) as usize] == -1 {
+                println!("detected it was a white pawn");
+                if board[(fourth_value - 1) as usize][*third_value as usize] == 0 {
+                    unpassant_move = index_to_position(&(fourth_value as u32), &((third_value - 1) as u32))
+                    + ":" + &index_to_position(
+                        &((fourth_value + 1) as u32),
+                        &(*third_value as u32),
+                    );
+                    white_moves.push(
+                        unpassant_move.clone()
+                    )
+                }
+            }
+        }
+    }
+    }
+    return (white_moves.to_vec(), black_moves.to_vec(), unpassant_move)
+}
 fn moves_and_attacks_from_board_state(
     board_state: [[i8; 8]; 8],
     int_to_alphabet: &HashMap<String, String>,
@@ -431,7 +514,7 @@ fn moves_and_attacks_from_board_state(
     String,
     String,
     Vec<String>,
-    Vec<Pieces>
+    Vec<Pieces>,
 ) {
     let mut board_state_vector: Vec<Pieces> = vec![];
     let mut first_index_counter: i8 = 0;
@@ -459,16 +542,15 @@ fn moves_and_attacks_from_board_state(
             }
             if *value == 3 || *value == -3 {
                 let mut square_color = "";
-                if (first_index_counter + 1 * secound_index_counter + 1) % 2 == 1{
+                if (first_index_counter + 1 * secound_index_counter + 1) % 2 == 1 {
                     square_color = "black";
-                }
-                else{
+                } else {
                     square_color = "white"
                 }
                 board_state_vector.push(Pieces::Bishop(Bishop {
                     position: (first_index_counter, secound_index_counter),
                     color: String::from(struct_color),
-                    square_color: String::from(square_color)
+                    square_color: String::from(square_color),
                 }));
             }
             if *value == 4 || *value == -4 {
@@ -498,8 +580,8 @@ fn moves_and_attacks_from_board_state(
     let mut black_piece_moves: Vec<String> = vec![];
     let mut black_squares_attacked: Vec<String> = vec![];
     let mut white_squares_attacked: Vec<String> = vec![];
-    let mut white_king_position:String = "".to_string();
-    let mut black_king_position:String = "".to_string();
+    let mut white_king_position: String = "".to_string();
+    let mut black_king_position: String = "".to_string();
     for value in board_state_vector.iter() {
         let mut piece_color = "";
         let mut piece_moves = vec![];
@@ -523,7 +605,10 @@ fn moves_and_attacks_from_board_state(
                 piece_position = pawn.position;
                 piece_moves = pawn.pawn_moves(board_state);
                 piece_attacks = pawn.pawn_attacks();
-                pawn_positions.push(index_to_position(&(piece_position.0 as u32), &(piece_position.1 as u32)))
+                pawn_positions.push(index_to_position(
+                    &(piece_position.0 as u32),
+                    &(piece_position.1 as u32),
+                ))
             }
             Pieces::Queen(queen) => {
                 piece_color = &queen.color;
@@ -543,10 +628,10 @@ fn moves_and_attacks_from_board_state(
                 piece_moves = king.king_moves(board_state);
                 piece_attacks = king.king_moves(board_state);
                 if piece_color == "white" {
-                     white_king_position =
+                    white_king_position =
                         index_to_position(&(piece_position.0 as u32), &(piece_position.1 as u32));
                 } else {
-                     black_king_position =
+                    black_king_position =
                         index_to_position(&(piece_position.0 as u32), &(piece_position.1 as u32));
                 }
             }
@@ -641,12 +726,12 @@ fn main() {
     int_to_alphabet.insert("7".to_string(), "a".to_string());
 
     let rank_one: [i8; 8] = [0, 0, 0, 0, 6, 0, 0, -6];
-    let rank_two: [i8; 8] = [-1, 0, 0, 0, 0, 0, 0, 0];
+    let rank_two: [i8; 8] = [0, 0, 0, 1, 0, 0, 0, 0];
     let rank_three: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_four: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_five: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    let rank_four: [i8; 8] = [0, 0, 0, 0, -1, 0, 0, 0];
+    let rank_five: [i8; 8] = [0, 0, 1, 0, 0, 0, 0, 0];
     let rank_six: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-    let rank_seven: [i8; 8] = [1, 0, 0, 0, 0, 0, 0, 0];
+    let rank_seven: [i8; 8] = [1, 0, 0, -1, 0, 0, 0, 0];
     let rank_eight: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
     let mut board_state: [[i8; 8]; 8] = [
         rank_one, rank_two, rank_three, rank_four, rank_five, rank_six, rank_seven, rank_eight,
@@ -664,21 +749,43 @@ fn main() {
     let mut is_white_to_move = true;
     let mut result = "";
     let mut fifty_move_counter: f32 = 0.0;
+    let mut last_move = "";
+    let mut custom_move: String = "".to_string();
     while game_has_ended == false {
         let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
         let mut total_moves = moves_and_attacks.0;
         let mut white_piece_moves = moves_and_attacks.1;
         let mut black_piece_moves = moves_and_attacks.3;
         println!("there are {} total moves", (total_moves.iter().len()));
-        let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
+        println!("last move is {}", last_move);
+        let white_and_black_moves = un_passant(board_state, last_move.to_string(), &alphabet_hash, &mut black_piece_moves, &mut white_piece_moves);
+        let unpassant_move = white_and_black_moves.2;
+        let mut white_piece_moves = white_and_black_moves.0;
+        for value in white_piece_moves.iter(){
+            println!("white can go {}", value)
+        }
+        let mut black_piece_moves = white_and_black_moves.1;
+        for value in black_piece_moves.iter(){
+            println!("black can go {}", value)
+        }
+        let parsed_piece_moves = prune_ilegal_moves(
+            &mut total_moves,
+            board_state,
+            &int_to_alphabet,
+            &alphabet_hash,
+            is_white_to_move,
+            &mut white_piece_moves,
+            &mut black_piece_moves,
+        );
         let white_piece_moves = parsed_piece_moves.0;
-        let black_piece_moves = parsed_piece_moves.1;    
+        let black_piece_moves = parsed_piece_moves.1;
         loop {
-            let mut custom_move = String::new();
+            custom_move = String::new();
             stdin().read_line(&mut custom_move).unwrap();
-            let custom_move = custom_move.trim().to_string();   
+            custom_move = custom_move.trim().to_string();
             if is_white_to_move {
                 if white_piece_moves.contains(&custom_move) {
+                    last_move = &custom_move;
                     let first_value = custom_move.chars().nth(0).unwrap().to_string();
                     let first_value = alphabet_hash.get(&first_value).unwrap();
                     let secound_value = custom_move.chars().nth(1).unwrap().to_string();
@@ -691,40 +798,41 @@ fn main() {
                     fourth_value -= 1;
                     let starting_position =
                         board_state[secound_value as usize][*first_value as usize];
-                        let pawn_positions = moves_and_attacks.7;
-                        if board_state[fourth_value as usize][*third_value as usize] < 0 || pawn_positions.contains(&custom_move[0..2].to_string()){
-                            fifty_move_counter = 0.0
-                        }
-                        else {
-                            fifty_move_counter += 0.5;
-                        }
-                        if fifty_move_counter == 50.0 {
-                            result = "draw by fifty move rule";
-                            game_has_ended = true
-                        }
+                    let pawn_positions = moves_and_attacks.7;
+                    if board_state[fourth_value as usize][*third_value as usize] < 0
+                        || pawn_positions.contains(&custom_move[0..2].to_string())
+                    {
+                        fifty_move_counter = 0.0
+                    } else {
+                        fifty_move_counter += 0.5;
+                    }
+                    if fifty_move_counter == 50.0 {
+                        result = "draw by fifty move rule";
+                        game_has_ended = true
+                    }
                     board_state[fourth_value as usize][*third_value as usize] = starting_position;
                     board_state[secound_value as usize][*first_value as usize] = 0;
-                    if fourth_value == 7{
-                        if board_state[fourth_value as usize][*third_value as usize] == 1{
+                    if custom_move == unpassant_move{
+                        board_state[(fourth_value - 1) as usize][*third_value as usize] = 0
+                    }
+                    if fourth_value == 7 {
+                        if board_state[fourth_value as usize][*third_value as usize] == 1 {
                             loop {
                                 let mut promotion_piece = String::new();
                                 stdin().read_line(&mut promotion_piece).unwrap();
                                 promotion_piece = promotion_piece.trim().to_string();
-                                if promotion_piece == "rook"{
+                                if promotion_piece == "rook" {
                                     board_state[fourth_value as usize][*third_value as usize] = 4;
-                                    break
-                                }
-                                else if promotion_piece == "bishop"{
+                                    break;
+                                } else if promotion_piece == "bishop" {
                                     board_state[fourth_value as usize][*third_value as usize] = 3;
-                                    break
-                                }
-                                else if promotion_piece == "knight"{
+                                    break;
+                                } else if promotion_piece == "knight" {
                                     board_state[fourth_value as usize][*third_value as usize] = 2;
-                                    break
-                                }
-                                else if promotion_piece == "queen"{
+                                    break;
+                                } else if promotion_piece == "queen" {
                                     board_state[fourth_value as usize][*third_value as usize] = 5;
-                                    break
+                                    break;
                                 }
                             }
                         }
@@ -753,66 +861,70 @@ fn main() {
                         game_has_ended = true;
                         result = "draw by repetition"
                     }
-                    let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
-        let mut white_piece_moves = moves_and_attacks.1;
-        let white_squares_attacked = moves_and_attacks.2;
-        let mut black_piece_moves = moves_and_attacks.3;
-        let black_king_position = moves_and_attacks.6;
-        let mut total_moves = moves_and_attacks.0;
-        let list_of_pieces = moves_and_attacks.8;
-        let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
-        let black_piece_moves = parsed_piece_moves.1; 
-        let mut number_of_knights = 0;
-        let mut number_of_black_bishops = 0;
-        let mut number_of_white_bishops = 0;
-        let mut number_of_bishops = 0;
-        if list_of_pieces.len() <= 4{
-            let mut bishop_color = "";
-            for value in list_of_pieces.iter(){
-                match value {
-                    Pieces::Knight(knight) => number_of_knights += 1,
-                    Pieces::Bishop(bishop) => {number_of_bishops += 1;
-                    if bishop.square_color == "white"{
-                        number_of_white_bishops += 1
+                    let moves_and_attacks =
+                        moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
+                    let mut white_piece_moves = moves_and_attacks.1;
+                    let white_squares_attacked = moves_and_attacks.2;
+                    let mut black_piece_moves = moves_and_attacks.3;
+                    let black_king_position = moves_and_attacks.6;
+                    let mut total_moves = moves_and_attacks.0;
+                    let list_of_pieces = moves_and_attacks.8;
+                    let parsed_piece_moves = prune_ilegal_moves(
+                        &mut total_moves,
+                        board_state,
+                        &int_to_alphabet,
+                        &alphabet_hash,
+                        is_white_to_move,
+                        &mut white_piece_moves,
+                        &mut black_piece_moves,
+                    );
+                    let black_piece_moves = parsed_piece_moves.1;
+                    let mut number_of_knights = 0;
+                    let mut number_of_black_bishops = 0;
+                    let mut number_of_white_bishops = 0;
+                    let mut number_of_bishops = 0;
+                    if list_of_pieces.len() <= 4 {
+                        let bishop_color = "";
+                        for value in list_of_pieces.iter() {
+                            match value {
+                                Pieces::Knight(knight) => number_of_knights += 1,
+                                Pieces::Bishop(bishop) => {
+                                    number_of_bishops += 1;
+                                    if bishop.square_color == "white" {
+                                        number_of_white_bishops += 1
+                                    } else {
+                                        number_of_black_bishops += 1
+                                    }
+                                }
+                                _ => println!(),
+                            }
+                        }
+                        if number_of_bishops + number_of_knights + 2 == list_of_pieces.len() {
+                            if number_of_bishops + number_of_knights <= 2 {
+                                if number_of_bishops == 1 && number_of_knights == 0 {
+                                    result = "draw by insufficent material";
+                                    game_has_ended = true;
+                                } else if number_of_knights == 1 && number_of_bishops == 0 {
+                                    result = "draw by insuffience material";
+                                    game_has_ended = true;
+                                } else if number_of_bishops + number_of_knights == 0 {
+                                    result = "draw by insufficent material";
+                                    game_has_ended = true;
+                                } else if number_of_white_bishops == 2 {
+                                    result = "draw by insufficent material";
+                                    game_has_ended = true
+                                } else if number_of_black_bishops == 2 {
+                                    result = "draw by insufficent material";
+                                    game_has_ended = true;
+                                }
+                            }
+                        }
                     }
-                    else{
-                        number_of_black_bishops += 1    
-                    }
-                }
-                _ => println!(),
-                }
-            }
-            if number_of_bishops + number_of_knights + 2 == list_of_pieces.len(){
-                if number_of_bishops + number_of_knights <= 2{
-                    if number_of_bishops == 1 && number_of_knights == 0{
-                        result = "draw by insufficent material";
-                        game_has_ended = true;
-                    }
-                    else if number_of_knights == 1 && number_of_bishops == 0{
-                        result = "draw by insuffience material";
-                        game_has_ended = true;
-                    }
-                    else if number_of_bishops + number_of_knights == 0{
-                        result = "draw by insufficent material";
-                        game_has_ended = true;
-                    }
-                    else if number_of_white_bishops == 2{
-                        result = "draw by insufficent material";
-                        game_has_ended = true
-                    }
-                    else if number_of_black_bishops == 2{
-                        result = "draw by insufficent material";
-                        game_has_ended = true;
-                    }
-                }
-            }
-        }
-                    if black_piece_moves.len() == 0{
-                        if white_squares_attacked.contains(&black_king_position){
+                    if black_piece_moves.len() == 0 {
+                        if white_squares_attacked.contains(&black_king_position) {
                             result = "white wins by checkmate";
                             game_has_ended = true;
-                        }
-                        else{
+                        } else {
                             result = "draw by stalemate";
                             game_has_ended = true;
                         }
@@ -824,6 +936,7 @@ fn main() {
                 }
             } else {
                 if black_piece_moves.contains(&custom_move) {
+                    last_move = &custom_move;
                     let first_value = custom_move.chars().nth(0).unwrap().to_string();
                     let first_value = alphabet_hash.get(&first_value).unwrap();
                     let secound_value = custom_move.chars().nth(1).unwrap().to_string();
@@ -836,46 +949,47 @@ fn main() {
                     fourth_value -= 1;
                     let starting_position =
                         board_state[secound_value as usize][*first_value as usize];
-                        let pawn_positions = moves_and_attacks.7;
-                        if board_state[fourth_value as usize][*third_value as usize] > 0 || pawn_positions.contains(&custom_move[0..2].to_string()){
-                            fifty_move_counter = 0.0
-                        }
-                        else {
-                            fifty_move_counter += 0.5;
-                        }
-                        if fifty_move_counter == 50.0 {
-                            result = "draw by fifty move rule";
-                            game_has_ended = true
-                        }
+                    let pawn_positions = moves_and_attacks.7;
+                    if board_state[fourth_value as usize][*third_value as usize] > 0
+                        || pawn_positions.contains(&custom_move[0..2].to_string())
+                    {
+                        fifty_move_counter = 0.0
+                    } else {
+                        fifty_move_counter += 0.5;
+                    }
+                    if fifty_move_counter == 50.0 {
+                        result = "draw by fifty move rule";
+                        game_has_ended = true
+                    }
                     board_state[fourth_value as usize][*third_value as usize] = starting_position;
                     board_state[secound_value as usize][*first_value as usize] = 0;
-                    
-                    if fourth_value == 0{
-                        if board_state[fourth_value as usize][*third_value as usize] == -1{
+                    if custom_move == unpassant_move{
+                        board_state[(fourth_value + 1) as usize][*third_value as usize] = 0
+                    }
+
+                    if fourth_value == 0 {
+                        if board_state[fourth_value as usize][*third_value as usize] == -1 {
                             loop {
                                 let mut promotion_piece = String::new();
                                 stdin().read_line(&mut promotion_piece).unwrap();
                                 promotion_piece = promotion_piece.trim().to_string();
-                                if promotion_piece == "rook"{
+                                if promotion_piece == "rook" {
                                     board_state[fourth_value as usize][*third_value as usize] = -4;
-                                    break
-                                }
-                                else if promotion_piece == "bishop"{
+                                    break;
+                                } else if promotion_piece == "bishop" {
                                     board_state[fourth_value as usize][*third_value as usize] = -3;
-                                    break
-                                }
-                                else if promotion_piece == "knight"{
+                                    break;
+                                } else if promotion_piece == "knight" {
                                     board_state[fourth_value as usize][*third_value as usize] = -2;
-                                    break
-                                }
-                                else if promotion_piece == "queen"{
+                                    break;
+                                } else if promotion_piece == "queen" {
                                     board_state[fourth_value as usize][*third_value as usize] = -5;
-                                    break
+                                    break;
                                 }
                             }
                         }
                     }
-                    
+
                     if is_white_to_move == true {
                         is_white_to_move = false;
                     } else {
@@ -901,66 +1015,69 @@ fn main() {
                         game_has_ended = true;
                         result = "draw by repetition"
                     }
-                    let moves_and_attacks = moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
-        let mut white_piece_moves = moves_and_attacks.1;
-        let mut black_piece_moves = moves_and_attacks.3;
-        let black_squares_attacked = moves_and_attacks.4;
-        let white_king_position = moves_and_attacks.5;
-        let mut total_moves = moves_and_attacks.0;
-        let parsed_piece_moves = prune_ilegal_moves(&mut total_moves, board_state, &int_to_alphabet, &alphabet_hash, is_white_to_move, &mut white_piece_moves, &mut black_piece_moves);
-        let white_piece_moves = parsed_piece_moves.0;
-        let list_of_pieces = moves_and_attacks.8;
-        let mut number_of_knights = 0;
-        let mut number_of_black_bishops = 0;
-        let mut number_of_white_bishops = 0;
-        let mut number_of_bishops = 0;
-        if list_of_pieces.len() <= 4{
-            for value in list_of_pieces.iter(){
-                match value {
-                    Pieces::Knight(Knight) => number_of_knights += 1,
-                    Pieces::Bishop(bishop) => {number_of_bishops += 1;
-                    if bishop.square_color == "white"{
-                        number_of_white_bishops += 1
+                    let moves_and_attacks =
+                        moves_and_attacks_from_board_state(board_state, &int_to_alphabet);
+                    let mut white_piece_moves = moves_and_attacks.1;
+                    let mut black_piece_moves = moves_and_attacks.3;
+                    let black_squares_attacked = moves_and_attacks.4;
+                    let white_king_position = moves_and_attacks.5;
+                    let mut total_moves = moves_and_attacks.0;
+                    let parsed_piece_moves = prune_ilegal_moves(
+                        &mut total_moves,
+                        board_state,
+                        &int_to_alphabet,
+                        &alphabet_hash,
+                        is_white_to_move,
+                        &mut white_piece_moves,
+                        &mut black_piece_moves,
+                    );
+                    let white_piece_moves = parsed_piece_moves.0;
+                    let list_of_pieces = moves_and_attacks.8;
+                    let mut number_of_knights = 0;
+                    let mut number_of_black_bishops = 0;
+                    let mut number_of_white_bishops = 0;
+                    let mut number_of_bishops = 0;
+                    if list_of_pieces.len() <= 4 {
+                        for value in list_of_pieces.iter() {
+                            match value {
+                                Pieces::Knight(Knight) => number_of_knights += 1,
+                                Pieces::Bishop(bishop) => {
+                                    number_of_bishops += 1;
+                                    if bishop.square_color == "white" {
+                                        number_of_white_bishops += 1
+                                    } else {
+                                        number_of_black_bishops += 1
+                                    }
+                                }
+                                _ => println!(),
+                            }
+                        }
+                        if number_of_bishops + number_of_knights + 2 == list_of_pieces.len() {
+                            if number_of_bishops + number_of_knights <= 2 {
+                                if number_of_bishops == 1 && number_of_knights == 0 {
+                                    result = "draw by insufficent material";
+                                    game_has_ended = true;
+                                } else if number_of_knights == 1 && number_of_bishops == 0 {
+                                    result = "draw by insuffience material";
+                                    game_has_ended = true;
+                                } else if number_of_bishops + number_of_knights == 0 {
+                                    result = "draw by insufficent material";
+                                    game_has_ended = true;
+                                } else if number_of_white_bishops == 2 {
+                                    result = "draw by insufficent material";
+                                    game_has_ended = true
+                                } else if number_of_black_bishops == 2 {
+                                    result = "draw by insufficent material";
+                                    game_has_ended = true;
+                                }
+                            }
+                        }
                     }
-                    else{
-                        number_of_black_bishops += 1    
-                    }
-                }
-                _ => println!(),
-                }
-            }
-            if number_of_bishops + number_of_knights + 2 == list_of_pieces.len(){
-                if number_of_bishops + number_of_knights <= 2{
-                    if number_of_bishops == 1 && number_of_knights == 0{
-                        result = "draw by insufficent material";
-                        game_has_ended = true;
-                    }
-                    else if number_of_knights == 1 && number_of_bishops == 0{
-                        result = "draw by insuffience material";
-                        game_has_ended = true;
-                    }
-                    else if number_of_bishops + number_of_knights == 0{
-                        result = "draw by insufficent material";
-                        game_has_ended = true;
-                    }
-                    else if number_of_white_bishops == 2{
-                        result = "draw by insufficent material";
-                        game_has_ended = true
-                    }
-                    else if number_of_black_bishops == 2{
-                        result = "draw by insufficent material";
-                        game_has_ended = true;
-                    }
-                }
-            }
-            
-        }
-                    if white_piece_moves.len() == 0{
-                        if black_squares_attacked.contains(&white_king_position){
+                    if white_piece_moves.len() == 0 {
+                        if black_squares_attacked.contains(&white_king_position) {
                             result = "black wins by checkmate";
                             game_has_ended = true;
-                        }
-                        else{
+                        } else {
                             result = "draw by stalemate";
                             game_has_ended = true;
                         }
