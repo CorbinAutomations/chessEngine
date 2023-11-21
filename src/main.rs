@@ -1,5 +1,5 @@
-use std::{collections::HashMap, io::stdin};
 use std::time::Instant;
+use std::{collections::HashMap, io::stdin};
 struct Rook {
     position: (i8, i8),
     color: String,
@@ -67,20 +67,15 @@ fn general_piece_moves(
             first_index_clone += first_index_increment;
             secound_index_clone += secound_index_increment;
             if board[first_index_clone as usize][secound_index_clone as usize] == 0 {
-                legal_moves
-                    .push((first_index_clone, secound_index_clone));
+                legal_moves.push((first_index_clone, secound_index_clone));
             } else if board[first_index_clone as usize][secound_index_clone as usize] < 0 {
                 if color == "white" {
-                    legal_moves.push(
-                        (first_index_clone, secound_index_clone),
-                    );
+                    legal_moves.push((first_index_clone, secound_index_clone));
                 }
                 break;
             } else {
                 if color == "black" {
-                    legal_moves.push(
-                        (first_index_clone, secound_index_clone),
-                    );
+                    legal_moves.push((first_index_clone, secound_index_clone));
                 }
                 break;
             }
@@ -156,23 +151,26 @@ impl Knight {
                     [(secound_index + secound_index_increment) as usize]
                     == 0
                 {
-                    legal_moves.push(
-                        (first_index + first_index_increment, secound_index + secound_index_increment),
-                    );
+                    legal_moves.push((
+                        first_index + first_index_increment,
+                        secound_index + secound_index_increment,
+                    ));
                 } else if board[(first_index + first_index_increment) as usize]
                     [(secound_index + secound_index_increment) as usize]
                     < 0
                 {
                     if self.color == "white" {
-                        legal_moves.push(
-                            (first_index + first_index_increment, secound_index + secound_index_increment),
-                        );
+                        legal_moves.push((
+                            first_index + first_index_increment,
+                            secound_index + secound_index_increment,
+                        ));
                     }
                 } else {
                     if self.color == "black" {
-                        legal_moves.push(
-                            (first_index + first_index_increment, secound_index + secound_index_increment),
-                        );
+                        legal_moves.push((
+                            first_index + first_index_increment,
+                            secound_index + secound_index_increment,
+                        ));
                     }
                 }
             }
@@ -218,60 +216,46 @@ impl Pawn {
                 if board[first_index as usize + 2][secound_index as usize] == 0
                     && board[first_index as usize + 1][secound_index as usize] == 0
                 {
-                    legal_moves
-                        .push((first_index + 2, secound_index));
+                    legal_moves.push((first_index + 2, secound_index));
+                    legal_moves.push((first_index + 1, secound_index));
                 }
-            }
-            else if first_index + 1 <= 7 {
+            } else if first_index + 1 <= 7 {
                 if board[first_index as usize + 1][secound_index as usize] == 0 {
-                    legal_moves
-                        .push((first_index + 1, secound_index));
+                    legal_moves.push((first_index + 1, secound_index));
                 }
             }
             if first_index + 1 <= 7 && secound_index - 1 >= 0 {
                 if board[first_index as usize + 1][secound_index as usize - 1] < 0 {
-                    legal_moves.push(
-                        (first_index + 1, secound_index - 1),
-                    );
+                    legal_moves.push((first_index + 1, secound_index - 1));
                 }
             }
 
             if first_index + 1 <= 7 && secound_index + 1 <= 7 {
                 if board[first_index as usize + 1][secound_index as usize + 1] < 0 {
-                    legal_moves.push(
-                        (first_index + 1, secound_index + 1),
-                    );
+                    legal_moves.push((first_index + 1, secound_index + 1));
                 }
             }
-        }
-
-        if self.color == "black" {
+        } else if self.color == "black" {
             if first_index - 2 >= 0 && first_index == 6 {
                 if board[first_index as usize - 2][secound_index as usize] == 0
                     && board[first_index as usize - 1][secound_index as usize] == 0
                 {
-                    legal_moves
-                        .push((first_index - 2, secound_index));
+                    legal_moves.push((first_index - 2, secound_index));
+                    legal_moves.push((first_index - 1, secound_index));
                 }
-            }
-            else if first_index - 1 >= 0 {
+            } else if first_index - 1 >= 0 {
                 if board[first_index as usize - 1][secound_index as usize] == 0 {
-                    legal_moves
-                        .push((first_index - 1, secound_index));
+                    legal_moves.push((first_index - 1, secound_index));
                 }
             }
             if first_index - 1 >= 0 && secound_index - 1 >= 0 {
                 if board[first_index as usize - 1][secound_index as usize - 1] > 0 {
-                    legal_moves.push(
-                        (first_index + 1, secound_index - 1),
-                    );
+                    legal_moves.push((first_index + 1, secound_index - 1));
                 }
             }
             if first_index - 1 >= 0 && secound_index + 1 <= 7 {
                 if board[first_index as usize - 1][secound_index as usize + 1] < 0 {
-                    legal_moves.push(
-                        (first_index - 1, secound_index + 1),
-                    );
+                    legal_moves.push((first_index - 1, secound_index + 1));
                 }
             }
         }
@@ -283,23 +267,17 @@ impl Pawn {
         let mut attack_moves: Vec<(i8, i8)> = vec![];
         if self.color == "white" {
             if first_index + 1 < 7 && secound_index - 1 >= 0 {
-                attack_moves
-                    .push((first_index + 1, secound_index - 1));
+                attack_moves.push((first_index + 1, secound_index - 1));
             }
-
             if first_index + 1 < 7 && secound_index + 1 <= 7 {
-                attack_moves
-                    .push((first_index + 1, secound_index + 1));
+                attack_moves.push((first_index + 1, secound_index + 1));
             }
-        }
-        if self.color == "black" {
+        } else if self.color == "black" {
             if first_index - 1 > 0 && secound_index - 1 >= 0 {
-                attack_moves
-                    .push((first_index - 1, secound_index - 1));
+                attack_moves.push((first_index - 1, secound_index - 1));
             }
             if first_index - 1 > 0 && secound_index + 1 <= 7 {
-                attack_moves
-                    .push((first_index - 1, secound_index + 1));
+                attack_moves.push((first_index - 1, secound_index + 1));
             }
         }
 
@@ -341,6 +319,7 @@ fn prune_ilegal_moves(
     white_moves: &mut Vec<((i8, i8), (i8, i8))>,
     black_moves: &mut Vec<((i8, i8), (i8, i8))>,
 ) -> (Vec<((i8, i8), (i8, i8))>, Vec<((i8, i8), (i8, i8))>) {
+    let start_of_pruning_moves = Instant::now();
     let mut legal_move_counter = 0;
     let color: &str;
     if is_white {
@@ -350,10 +329,10 @@ fn prune_ilegal_moves(
     }
     for value in legal_moves.iter() {
         let mut board_state = board;
-        let first_value = value.0.0;
-        let secound_value = value.0.1;
-        let third_value = value.1.0;
-        let fourth_value = value.1.1;
+        let first_value = value.0 .0;
+        let secound_value = value.0 .1;
+        let third_value = value.1 .0;
+        let fourth_value = value.1 .1;
         let starting_position = board_state[first_value as usize][secound_value as usize];
         board_state[third_value as usize][fourth_value as usize] = starting_position;
         board_state[first_value as usize][secound_value as usize] = 0;
@@ -366,24 +345,17 @@ fn prune_ilegal_moves(
         if color == "white" {
             if black_squares_attacked.contains(&white_king_position) {
                 let move_to_remove = legal_moves.get(legal_move_counter).unwrap();
-                let index = white_moves.iter().position(|x| *x == *move_to_remove);
-                if index.is_some() {
-                    white_moves.remove(index.unwrap());
-                    println!("we just removed something")
-                }
+                white_moves.retain(|x| *x != *move_to_remove);
             }
         } else {
             if white_squares_attacked.contains(&black_king_position) {
                 let move_to_remove = legal_moves.get(legal_move_counter).unwrap();
-                let index = black_moves.iter().position(|x| *x == *move_to_remove);
-                if index.is_some() {
-                    black_moves.remove(index.unwrap());
-                    println!("we just removed something")
-                }
+                black_moves.retain(|x| *x != *move_to_remove);
             }
         }
         legal_move_counter += 1;
     }
+    println!("there have been {} microsecounds in pruning illigal moves", start_of_pruning_moves.elapsed().as_micros());
     return (white_moves.to_vec(), black_moves.to_vec());
 }
 
@@ -392,56 +364,76 @@ fn un_passant(
     last_move: ((i8, i8), (i8, i8)),
     black_moves: &mut Vec<((i8, i8), (i8, i8))>,
     white_moves: &mut Vec<((i8, i8), (i8, i8))>,
-)-> (Vec<((i8, i8), (i8, i8))>, Vec<((i8, i8), (i8, i8))>, ((i8, i8), (i8, i8))){
+) -> (
+    Vec<((i8, i8), (i8, i8))>,
+    Vec<((i8, i8), (i8, i8))>,
+    ((i8, i8), (i8, i8)),
+) {
     let mut unpassant_move: ((i8, i8), (i8, i8)) = ((10, 10), (10, 10));
-
-    if last_move != ((10, 10), (10, 10)){
-    let first_value = last_move.0.0;
-    let secound_value = last_move.0.1;
-    let third_value = last_move.1.0;
-    let fourth_value = last_move.1.1;
-    if board[third_value as usize][fourth_value as usize] == 1 {
-        if third_value - first_value == 2 {
-            if board[third_value as usize][(fourth_value - 1) as usize] == -1 {
-                if board[(third_value - 1) as usize][fourth_value as usize] == 0 {
-                    unpassant_move = ((third_value, fourth_value -1), (third_value -1, fourth_value));
-                    black_moves.push(
-                       unpassant_move.clone() 
-                    )
+    if last_move != ((10, 10), (10, 10)) {
+        let first_value = last_move.0 .0;
+        let secound_value = last_move.0 .1;
+        let third_value = last_move.1 .0;
+        let fourth_value = last_move.1 .1;
+        if ! third_value - 1 >= 0 {
+            if board[third_value as usize][fourth_value as usize] == 1 {
+                if third_value - first_value == 2 {
+                    if ! fourth_value - 1 >= 0 {
+                        if board[third_value as usize][(fourth_value - 1) as usize] == -1 {
+                            if board[(third_value - 1) as usize][fourth_value as usize] == 0 {
+                                unpassant_move = (
+                                    (third_value, fourth_value - 1),
+                                    (third_value - 1, fourth_value),
+                                );
+                                black_moves.push(unpassant_move.clone())
+                            }
+                        } 
+                    }
+                    if !fourth_value + 1 <= 7{
+                        if board[third_value as usize][(fourth_value + 1) as usize] == -1 {
+                            if board[(third_value - 1) as usize][fourth_value as usize] == 0 {
+                                let unpassant_move = (
+                                    (third_value, fourth_value + 1),
+                                    (third_value - 1, fourth_value - 1),
+                                );
+                                black_moves.push(unpassant_move.clone())
+                            }
+                        }
+                    }
                 }
-            }
-            else if board[third_value as usize][(fourth_value + 1) as usize] == -1 {
-                if board[(third_value - 1) as usize][fourth_value as usize] == 0 {
-                    let unpassant_move = ((third_value, fourth_value + 1), (third_value - 1, fourth_value -1));
-                    black_moves.push(
-                        unpassant_move.clone()
-                    )
+            } 
+        }
+        if third_value + 1 <= 7 {
+            if board[third_value as usize][fourth_value as usize] == -1 {
+                if fourth_value - secound_value == -2 {
+                    if fourth_value - 1 >= 0 {
+                        if board[third_value as usize][(fourth_value - 1) as usize] == 1 {
+                            if board[(third_value + 1) as usize][fourth_value as usize] == 0 {
+                                unpassant_move = (
+                                    (third_value, fourth_value - 1),
+                                    (third_value + 1, fourth_value),
+                                );
+                                white_moves.push(unpassant_move.clone())
+                            }
+                        }
+                    }
+                    if fourth_value + 1 <= 7{
+                        if board[third_value as usize][(fourth_value + 1) as usize] == -1 {
+                            if board[(third_value - 1) as usize][fourth_value as usize] == 0 {
+                                unpassant_move = (
+                                    (third_value, fourth_value - 1),
+                                    (third_value - 1, fourth_value),
+                                );
+                                white_moves.push(unpassant_move.clone())
+                            }
+                        }
+                    }
+                        
                 }
             }
         }
     }
-    else if board[third_value as usize][fourth_value as usize] == -1 {
-        if fourth_value - secound_value == -2 {
-            if board[third_value as usize][(fourth_value - 1) as usize] == 1 {
-                if board[(third_value + 1) as usize][fourth_value as usize] == 0 {
-                    unpassant_move = ((third_value, fourth_value -1), (third_value + 1, fourth_value ));
-                    white_moves.push(
-                        unpassant_move.clone()
-                    )
-                }
-            }
-            else if board[third_value as usize][(fourth_value + 1) as usize] == -1 {
-                if board[(third_value - 1) as usize][fourth_value as usize] == 0 {
-                    unpassant_move = ((third_value, fourth_value -1), (third_value- 1, fourth_value));
-                    white_moves.push(
-                        unpassant_move.clone()
-                    )
-                }
-            }
-        }
-    }
-    }
-    return (white_moves.to_vec(), black_moves.to_vec(), unpassant_move)
+    return (white_moves.to_vec(), black_moves.to_vec(), unpassant_move);
 }
 fn moves_and_attacks_from_board_state(
     board_state: [[i8; 8]; 8],
@@ -461,7 +453,7 @@ fn moves_and_attacks_from_board_state(
     let mut pawn_positions: Vec<(i8, i8)> = vec![];
     for value in board_state.iter() {
         let mut secound_index_counter: i8 = 0;
-        let mut struct_color = "";
+        let mut struct_color: &str = "";
         for value in value.iter() {
             if *value < 0 {
                 struct_color = "black";
@@ -473,14 +465,12 @@ fn moves_and_attacks_from_board_state(
                     position: (first_index_counter, secound_index_counter),
                     color: String::from(struct_color),
                 }));
-            }
-            else if *value == 2 || *value == -2 {
+            } else if *value == 2 || *value == -2 {
                 board_state_vector.push(Pieces::Knight(Knight {
                     position: (first_index_counter, secound_index_counter),
                     color: String::from(struct_color),
                 }));
-            }
-            else if *value == 3 || *value == -3 {
+            } else if *value == 3 || *value == -3 {
                 let square_color: &str;
                 if (first_index_counter + 1 * secound_index_counter + 1) % 2 == 1 {
                     square_color = "black";
@@ -492,20 +482,17 @@ fn moves_and_attacks_from_board_state(
                     color: String::from(struct_color),
                     square_color: String::from(square_color),
                 }));
-            }
-            else if *value == 4 || *value == -4 {
+            } else if *value == 4 || *value == -4 {
                 board_state_vector.push(Pieces::Rook(Rook {
                     position: (first_index_counter, secound_index_counter),
                     color: String::from(struct_color),
                 }));
-            }
-            else if *value == 5 || *value == -5 {
+            } else if *value == 5 || *value == -5 {
                 board_state_vector.push(Pieces::Queen(Queen {
                     position: (first_index_counter, secound_index_counter),
                     color: String::from(struct_color),
                 }));
-            }
-            else if *value == 6 || *value == -6 {
+            } else if *value == 6 || *value == -6 {
                 board_state_vector.push(Pieces::King(King {
                     position: (first_index_counter, secound_index_counter),
                     color: String::from(struct_color),
@@ -570,11 +557,9 @@ fn moves_and_attacks_from_board_state(
                 piece_moves = king_move.clone();
                 piece_attacks = king_move;
                 if piece_color == "white" {
-                    white_king_position =
-                                (piece_position.0, piece_position.1)                
-                    } else {
-                    black_king_position =
-                    (piece_position.0, piece_position.1)
+                    white_king_position = (piece_position.0, piece_position.1)
+                } else {
+                    black_king_position = (piece_position.0, piece_position.1)
                 }
             }
         }
@@ -591,13 +576,9 @@ fn moves_and_attacks_from_board_state(
         for value in piece_attacks.iter() {
             let parsed_move = (piece_position, *value);
             if piece_color == "white" {
-                white_squares_attacked.push(
-                    parsed_move.1
-                )
+                white_squares_attacked.push(parsed_move.1)
             } else {
-                black_squares_attacked.push(
-                    parsed_move.1
-                )
+                black_squares_attacked.push(parsed_move.1)
             }
         }
     }
@@ -626,16 +607,6 @@ fn main() {
     alphabet_hash.insert(String::from("b"), 6);
     alphabet_hash.insert(String::from("a"), 7);
 
-    let mut int_to_alphabet: HashMap<String, String> = HashMap::new();
-    int_to_alphabet.insert("0".to_string(), "h".to_string());
-    int_to_alphabet.insert("1".to_string(), "g".to_string());
-    int_to_alphabet.insert("2".to_string(), "f".to_string());
-    int_to_alphabet.insert("3".to_string(), "e".to_string());
-    int_to_alphabet.insert("4".to_string(), "d".to_string());
-    int_to_alphabet.insert("5".to_string(), "c".to_string());
-    int_to_alphabet.insert("6".to_string(), "b".to_string());
-    int_to_alphabet.insert("7".to_string(), "a".to_string());
-
     let rank_one: [i8; 8] = [4, 2, 3, 6, 5, 3, 2, 4];
     let rank_two: [i8; 8] = [1, 1, 1, 1, 1, 1, 1, 1];
     let rank_three: [i8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -661,35 +632,31 @@ fn main() {
     let mut result = "";
     let mut fifty_move_counter: f32 = 0.0;
     let mut last_move: ((i8, i8), (i8, i8)) = ((10, 10), (10, 10));
-    let mut custom_move:String;
+    let mut custom_move: String;
     let mut white_can_caste_kingside = true;
-        let mut white_can_caste_queenside = true;
-        let mut black_can_caste_kingside = true;
-        let mut black_can_caste_queenside = true;
-        let mut white_has_castled = false;
-        let mut black_has_castled = false;
+    let mut white_can_caste_queenside = true;
+    let mut black_can_caste_kingside = true;
+    let mut black_can_caste_queenside = true;
+    let mut white_has_castled = false;
+    let mut black_has_castled = false;
     while game_has_ended == false {
         let now = Instant::now();
-        if ! white_has_castled{
-            if board_state[0][0] != 4{
+        if !white_has_castled {
+            if board_state[0][0] != 4 {
                 white_can_caste_kingside = false;
-            }
-            if board_state[0][7] != 4{
+            } else if board_state[0][7] != 4 {
                 white_can_caste_queenside = false
-            }
-            if board_state[0][3] != 6{
+            } else if board_state[0][3] != 6 {
                 white_can_caste_kingside = false;
                 white_can_caste_queenside = false;
             }
         }
-        if ! black_has_castled{
-            if board_state[7][0] != -4{
+        if !black_has_castled {
+            if board_state[7][0] != -4 {
                 black_can_caste_kingside = false;
-            }
-            if board_state[7][7] != -4{
+            } else if board_state[7][7] != -4 {
                 black_can_caste_queenside = false
-            }
-            if board_state[7][3] != -6{
+            } else if board_state[7][3] != -6 {
                 black_can_caste_kingside = false;
                 black_can_caste_queenside = false;
             }
@@ -701,7 +668,12 @@ fn main() {
         let mut black_piece_moves = moves_and_attacks.3;
         let black_piece_attacks = moves_and_attacks.4;
         println!("there are {} total moves", (total_moves.iter().len()));
-        let white_and_black_moves = un_passant(board_state, last_move,  &mut black_piece_moves, &mut white_piece_moves);
+        let white_and_black_moves = un_passant(
+            board_state,
+            last_move,
+            &mut black_piece_moves,
+            &mut white_piece_moves,
+        );
         let unpassant_move = white_and_black_moves.2;
         let mut white_piece_moves = white_and_black_moves.0;
         let mut black_piece_moves = white_and_black_moves.1;
@@ -714,33 +686,39 @@ fn main() {
         );
         let mut white_piece_moves = parsed_piece_moves.0;
         let mut black_piece_moves = parsed_piece_moves.1;
-        if  !(black_piece_attacks.contains(&(0, 1)) ||
-                    black_piece_attacks.contains(&(0, 2)) ||
-                    black_piece_attacks.contains(&(0, 3))) && white_can_caste_kingside
-                    && board_state[0][2] == 0 &&
-                    board_state[0][1] == 0{
-                        white_piece_moves.push(((0, 3), (0, 0)));
-                    }
-        if ! (black_piece_attacks.contains(&(0, 5)) ||
-        black_piece_attacks.contains(&(0, 6)) ||
-        black_piece_attacks.contains(&(0, 3))) && white_can_caste_queenside
-        && board_state[0][6] == 0 &&
-                    board_state[0][5] == 0{
-                        white_piece_moves.push(((0, 3), (0, 7)));
+        if !(black_piece_attacks.contains(&(0, 1))
+            || black_piece_attacks.contains(&(0, 2))
+            || black_piece_attacks.contains(&(0, 3)))
+            && white_can_caste_kingside
+            && board_state[0][2] == 0
+            && board_state[0][1] == 0
+        {
+            white_piece_moves.push(((0, 3), (0, 0)));
         }
-        if ! (white_piece_attacks.contains(&(7, 1)) ||
-                    white_piece_attacks.contains(&(7, 2)) ||
-                    white_piece_attacks.contains(&(7, 3))) && black_can_caste_kingside
-                    && board_state[7][2] == 0 &&
-                    board_state[7][1] == 0{
-                        black_piece_moves.push(((7, 3), (7, 0)));
-                    }
-        if  !(white_piece_attacks.contains(&(7, 5)) ||
-        white_piece_attacks.contains(&(7, 6)) ||
-        white_piece_attacks.contains(&(7, 3))) && (black_can_caste_queenside
-        && board_state[7][6] == 0 &&
-                    board_state[7][5] == 0){
-                        white_piece_moves.push(((7, 3), (7, 7)));
+        if !(black_piece_attacks.contains(&(0, 5))
+            || black_piece_attacks.contains(&(0, 6))
+            || black_piece_attacks.contains(&(0, 3)))
+            && white_can_caste_queenside
+            && board_state[0][6] == 0
+            && board_state[0][5] == 0
+        {
+            white_piece_moves.push(((0, 3), (0, 7)));
+        }
+        if !(white_piece_attacks.contains(&(7, 1))
+            || white_piece_attacks.contains(&(7, 2))
+            || white_piece_attacks.contains(&(7, 3)))
+            && black_can_caste_kingside
+            && board_state[7][2] == 0
+            && board_state[7][1] == 0
+        {
+            black_piece_moves.push(((7, 3), (7, 0)));
+        }
+        if !(white_piece_attacks.contains(&(7, 5))
+            || white_piece_attacks.contains(&(7, 6))
+            || white_piece_attacks.contains(&(7, 3)))
+            && (black_can_caste_queenside && board_state[7][6] == 0 && board_state[7][5] == 0)
+        {
+            white_piece_moves.push(((7, 3), (7, 7)));
         }
         println!("time since start {}", now.elapsed().as_micros());
         loop {
@@ -757,11 +735,14 @@ fn main() {
             let fourth_value = custom_move.chars().nth(4).unwrap().to_string();
             let mut fourth_value: i8 = fourth_value.parse().unwrap();
             fourth_value -= 1;
-            let custom_move: ((i8, i8), (i8, i8)) = ((secound_value as i8, *first_value as i8), (fourth_value as i8, *third_value as i8));
+            let custom_move: ((i8, i8), (i8, i8)) = (
+                (secound_value as i8, *first_value as i8),
+                (fourth_value as i8, *third_value as i8),
+            );
             if is_white_to_move {
                 if white_piece_moves.contains(&custom_move) {
                     last_move = custom_move;
-                    if custom_move == ((0, 3), (0, 0)){
+                    if custom_move == ((0, 3), (0, 0)) {
                         white_has_castled = true;
                         last_move = ((10, 10), (10, 10));
                         board_state[0][3] = 0;
@@ -770,12 +751,11 @@ fn main() {
                         board_state[0][2] = 4;
                         fifty_move_counter = 0.0;
                         fifty_move_counter += 0.5;
-                    if fifty_move_counter == 50.0 {
-                        result = "draw by fifty move rule";
-                        game_has_ended = true
-                    }
-                }
-                    else if custom_move == ((0, 3), (0, 7)){
+                        if fifty_move_counter == 50.0 {
+                            result = "draw by fifty move rule";
+                            game_has_ended = true
+                        }
+                    } else if custom_move == ((0, 3), (0, 7)) {
                         last_move = ((10, 10), (10, 10));
                         white_has_castled = true;
                         board_state[0][3] = 0;
@@ -784,53 +764,57 @@ fn main() {
                         board_state[0][4] = 4;
                         fifty_move_counter = 0.0;
                         fifty_move_counter += 0.5;
-                    if fifty_move_counter == 50.0 {
-                        result = "draw by fifty move rule";
-                        game_has_ended = true
-                    }
-                    }
-                    else {
-                        let starting_position =
-                        board_state[secound_value as usize][*first_value as usize];
-                        let pawn_positions = moves_and_attacks.7;
-                    if board_state[fourth_value as usize][*third_value as usize] < 0
-                        || pawn_positions.contains(&custom_move.0)
-                    {
-                        fifty_move_counter = 0.0
+                        if fifty_move_counter == 50.0 {
+                            result = "draw by fifty move rule";
+                            game_has_ended = true
+                        }
                     } else {
-                        fifty_move_counter += 0.5;
-                    }
-                    if fifty_move_counter == 50.0 {
-                        result = "draw by fifty move rule";
-                        game_has_ended = true
-                    } 
-                    board_state[fourth_value as usize][*third_value as usize] = starting_position;
-                    board_state[secound_value as usize][*first_value as usize] = 0;
-                    if custom_move == unpassant_move{
-                        board_state[(fourth_value - 1) as usize][*third_value as usize] = 0
-                    }
-                    if fourth_value == 7 {
-                        if board_state[fourth_value as usize][*third_value as usize] == 1 {
-                            loop {
-                                let mut promotion_piece = String::new();
-                                stdin().read_line(&mut promotion_piece).unwrap();
-                                promotion_piece = promotion_piece.trim().to_string();
-                                if promotion_piece == "rook" {
-                                    board_state[fourth_value as usize][*third_value as usize] = 4;
-                                    break;
-                                } else if promotion_piece == "bishop" {
-                                    board_state[fourth_value as usize][*third_value as usize] = 3;
-                                    break;
-                                } else if promotion_piece == "knight" {
-                                    board_state[fourth_value as usize][*third_value as usize] = 2;
-                                    break;
-                                } else if promotion_piece == "queen" {
-                                    board_state[fourth_value as usize][*third_value as usize] = 5;
-                                    break;
+                        let starting_position =
+                            board_state[secound_value as usize][*first_value as usize];
+                        let pawn_positions = moves_and_attacks.7;
+                        if board_state[fourth_value as usize][*third_value as usize] < 0
+                            || pawn_positions.contains(&custom_move.0)
+                        {
+                            fifty_move_counter = 0.0
+                        } else {
+                            fifty_move_counter += 0.5;
+                        }
+                        if fifty_move_counter == 50.0 {
+                            result = "draw by fifty move rule";
+                            game_has_ended = true
+                        }
+                        board_state[fourth_value as usize][*third_value as usize] =
+                            starting_position;
+                        board_state[secound_value as usize][*first_value as usize] = 0;
+                        if custom_move == unpassant_move {
+                            board_state[(fourth_value - 1) as usize][*third_value as usize] = 0
+                        }
+                        if fourth_value == 7 {
+                            if board_state[fourth_value as usize][*third_value as usize] == 1 {
+                                loop {
+                                    let mut promotion_piece = String::new();
+                                    stdin().read_line(&mut promotion_piece).unwrap();
+                                    promotion_piece = promotion_piece.trim().to_string();
+                                    if promotion_piece == "rook" {
+                                        board_state[fourth_value as usize][*third_value as usize] =
+                                            4;
+                                        break;
+                                    } else if promotion_piece == "bishop" {
+                                        board_state[fourth_value as usize][*third_value as usize] =
+                                            3;
+                                        break;
+                                    } else if promotion_piece == "knight" {
+                                        board_state[fourth_value as usize][*third_value as usize] =
+                                            2;
+                                        break;
+                                    } else if promotion_piece == "queen" {
+                                        board_state[fourth_value as usize][*third_value as usize] =
+                                            5;
+                                        break;
+                                    }
                                 }
                             }
                         }
-                    }
                     }
                     if is_white_to_move == true {
                         is_white_to_move = false;
@@ -852,8 +836,7 @@ fn main() {
                         game_has_ended = true;
                         result = "draw by repetition"
                     }
-                    let moves_and_attacks =
-                        moves_and_attacks_from_board_state(board_state);
+                    let moves_and_attacks = moves_and_attacks_from_board_state(board_state);
                     let mut white_piece_moves = moves_and_attacks.1;
                     let white_squares_attacked = moves_and_attacks.2;
                     let mut black_piece_moves = moves_and_attacks.3;
@@ -924,7 +907,7 @@ fn main() {
             } else {
                 if black_piece_moves.contains(&custom_move) {
                     last_move = custom_move;
-                    if custom_move == ((7, 3), (7, 0)){
+                    if custom_move == ((7, 3), (7, 0)) {
                         last_move = ((10, 10), (10, 10));
                         black_has_castled = true;
                         board_state[7][3] = 0;
@@ -933,12 +916,11 @@ fn main() {
                         board_state[7][2] = -4;
                         fifty_move_counter = 0.0;
                         fifty_move_counter += 0.5;
-                    if fifty_move_counter == 50.0 {
-                        result = "draw by fifty move rule";
-                        game_has_ended = true
-                    }
-                }
-                    else if custom_move == ((7, 3), (7, 7)){
+                        if fifty_move_counter == 50.0 {
+                            result = "draw by fifty move rule";
+                            game_has_ended = true
+                        }
+                    } else if custom_move == ((7, 3), (7, 7)) {
                         black_has_castled = true;
                         last_move = ((10, 10), (10, 10));
                         board_state[7][3] = 0;
@@ -947,55 +929,58 @@ fn main() {
                         board_state[7][4] = -4;
                         fifty_move_counter = 0.0;
                         fifty_move_counter += 0.5;
-                    if fifty_move_counter == 50.0 {
-                        result = "draw by fifty move rule";
-                        game_has_ended = true
-                    }
-                    }
-                    else {
-                    let starting_position =
-                        board_state[secound_value as usize][*first_value as usize];
-                    let pawn_positions = moves_and_attacks.7;
-                    if board_state[fourth_value as usize][*third_value as usize] > 0
-                        || pawn_positions.contains(&custom_move.0)
-                    {
-                        fifty_move_counter = 0.0
+                        if fifty_move_counter == 50.0 {
+                            result = "draw by fifty move rule";
+                            game_has_ended = true
+                        }
                     } else {
-                        fifty_move_counter += 0.5;
-                    }
-                    if fifty_move_counter == 50.0 {
-                        result = "draw by fifty move rule";
-                        game_has_ended = true
-                    }
-                    board_state[fourth_value as usize][*third_value as usize] = starting_position;
-                    board_state[secound_value as usize][*first_value as usize] = 0;
-                    if custom_move == unpassant_move{
-                        board_state[(fourth_value + 1) as usize][*third_value as usize] = 0
-                    }
-                    if fourth_value == 0 {
-                        if board_state[fourth_value as usize][*third_value as usize] == -1 {
-                            loop {
-                                let mut promotion_piece = String::new();
-                                stdin().read_line(&mut promotion_piece).unwrap();
-                                promotion_piece = promotion_piece.trim().to_string();
-                                if promotion_piece == "rook" {
-                                    board_state[fourth_value as usize][*third_value as usize] = -4;
-                                    break;
-                                } else if promotion_piece == "bishop" {
-                                    board_state[fourth_value as usize][*third_value as usize] = -3;
-                                    break;
-                                } else if promotion_piece == "knight" {
-                                    board_state[fourth_value as usize][*third_value as usize] = -2;
-                                    break;
-                                } else if promotion_piece == "queen" {
-                                    board_state[fourth_value as usize][*third_value as usize] = -5;
-                                    break;
+                        let starting_position =
+                            board_state[secound_value as usize][*first_value as usize];
+                        let pawn_positions = moves_and_attacks.7;
+                        if board_state[fourth_value as usize][*third_value as usize] > 0
+                            || pawn_positions.contains(&custom_move.0)
+                        {
+                            fifty_move_counter = 0.0
+                        } else {
+                            fifty_move_counter += 0.5;
+                        }
+                        if fifty_move_counter == 50.0 {
+                            result = "draw by fifty move rule";
+                            game_has_ended = true
+                        }
+                        board_state[fourth_value as usize][*third_value as usize] =
+                            starting_position;
+                        board_state[secound_value as usize][*first_value as usize] = 0;
+                        if custom_move == unpassant_move {
+                            board_state[(fourth_value + 1) as usize][*third_value as usize] = 0
+                        }
+                        if fourth_value == 0 {
+                            if board_state[fourth_value as usize][*third_value as usize] == -1 {
+                                loop {
+                                    let mut promotion_piece = String::new();
+                                    stdin().read_line(&mut promotion_piece).unwrap();
+                                    promotion_piece = promotion_piece.trim().to_string();
+                                    if promotion_piece == "rook" {
+                                        board_state[fourth_value as usize][*third_value as usize] =
+                                            -4;
+                                        break;
+                                    } else if promotion_piece == "bishop" {
+                                        board_state[fourth_value as usize][*third_value as usize] =
+                                            -3;
+                                        break;
+                                    } else if promotion_piece == "knight" {
+                                        board_state[fourth_value as usize][*third_value as usize] =
+                                            -2;
+                                        break;
+                                    } else if promotion_piece == "queen" {
+                                        board_state[fourth_value as usize][*third_value as usize] =
+                                            -5;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-                    }
-
 
                     if is_white_to_move == true {
                         is_white_to_move = false;
@@ -1018,8 +1003,7 @@ fn main() {
                         game_has_ended = true;
                         result = "draw by repetition"
                     }
-                    let moves_and_attacks =
-                        moves_and_attacks_from_board_state(board_state);
+                    let moves_and_attacks = moves_and_attacks_from_board_state(board_state);
                     let mut white_piece_moves = moves_and_attacks.1;
                     let mut black_piece_moves = moves_and_attacks.3;
                     let black_squares_attacked = moves_and_attacks.4;
