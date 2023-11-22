@@ -375,10 +375,11 @@ fn un_passant(
         let secound_value = last_move.0 .1;
         let third_value = last_move.1 .0;
         let fourth_value = last_move.1 .1;
-        if ! third_value - 1 >= 0 {
+        if third_value - 1 >= 0 {
             if board[third_value as usize][fourth_value as usize] == 1 {
                 if third_value - first_value == 2 {
-                    if ! fourth_value - 1 >= 0 {
+                    println!("white moved up two squares");
+                    if fourth_value - 1 >= 0 {
                         if board[third_value as usize][(fourth_value - 1) as usize] == -1 {
                             if board[(third_value - 1) as usize][fourth_value as usize] == 0 {
                                 unpassant_move = (
@@ -394,7 +395,7 @@ fn un_passant(
                             if board[(third_value - 1) as usize][fourth_value as usize] == 0 {
                                 let unpassant_move = (
                                     (third_value, fourth_value + 1),
-                                    (third_value - 1, fourth_value - 1),
+                                    (third_value - 1, fourth_value),
                                 );
                                 black_moves.push(unpassant_move.clone())
                             }
@@ -405,7 +406,9 @@ fn un_passant(
         }
         if third_value + 1 <= 7 {
             if board[third_value as usize][fourth_value as usize] == -1 {
-                if fourth_value - secound_value == -2 {
+                if third_value - first_value == -2 {
+                    println!("black moved up two squares");
+
                     if fourth_value - 1 >= 0 {
                         if board[third_value as usize][(fourth_value - 1) as usize] == 1 {
                             if board[(third_value + 1) as usize][fourth_value as usize] == 0 {
@@ -422,7 +425,7 @@ fn un_passant(
                             if board[(third_value - 1) as usize][fourth_value as usize] == 0 {
                                 unpassant_move = (
                                     (third_value, fourth_value - 1),
-                                    (third_value - 1, fourth_value),
+                                    (third_value + 1, fourth_value),
                                 );
                                 white_moves.push(unpassant_move.clone())
                             }
@@ -714,9 +717,9 @@ fn main() {
             black_piece_moves.push(((7, 3), (7, 0)));
         }
         if !(white_piece_attacks.contains(&(7, 5))
-            || white_piece_attacks.contains(&(7, 6))
+            || white_piece_attacks.contains(&(7, 4))
             || white_piece_attacks.contains(&(7, 3)))
-            && (black_can_caste_queenside && board_state[7][6] == 0 && board_state[7][5] == 0)
+            && (black_can_caste_queenside && board_state[7][4] == 0 && board_state[7][5] == 0)
         {
             white_piece_moves.push(((7, 3), (7, 7)));
         }
