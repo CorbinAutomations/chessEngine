@@ -699,10 +699,10 @@ fn main() {
             white_piece_moves.push(((0, 3), (0, 0)));
         }
         if !(black_piece_attacks.contains(&(0, 5))
-            || black_piece_attacks.contains(&(0, 6))
+            || black_piece_attacks.contains(&(0, 4))
             || black_piece_attacks.contains(&(0, 3)))
             && white_can_caste_queenside
-            && board_state[0][6] == 0
+            && board_state[0][4] == 0
             && board_state[0][5] == 0
         {
             white_piece_moves.push(((0, 3), (0, 7)));
